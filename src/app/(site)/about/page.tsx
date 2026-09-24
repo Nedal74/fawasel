@@ -22,6 +22,9 @@ export default async function AboutPage() {
   ]);
   const copy = makeCopy(content, locale);
   const strings = getStrings(locale);
+  // The Settings toggles hide a section everywhere it appears, not just on the
+  // homepage.
+  const enabled = (key: string) => settings.sections?.[key] !== false;
 
   return (
     <>
@@ -31,8 +34,10 @@ export default async function AboutPage() {
         intro={copy("about.lead")}
       />
       <AboutSection copy={copy} strings={strings} image={settings.aboutImage} />
-      <SkillsSection skills={skills} locale={locale} copy={copy} />
-      <IntelligenceSection metrics={metrics} locale={locale} copy={copy} />
+      {enabled("skills") ? <SkillsSection skills={skills} locale={locale} copy={copy} /> : null}
+      {enabled("intelligence") ? (
+        <IntelligenceSection metrics={metrics} locale={locale} copy={copy} />
+      ) : null}
     </>
   );
 }
