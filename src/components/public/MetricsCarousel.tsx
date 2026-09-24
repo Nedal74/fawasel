@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useAutoAdvance } from "@/hooks/useAutoAdvance";
+import { useAutoAdvance, usePageVisible } from "@/hooks/useAutoAdvance";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSwipe } from "@/hooks/useSwipe";
 import { cn } from "@/lib/utils";
@@ -49,15 +49,15 @@ function useCountTo(value: number, active: boolean, reduced: boolean) {
  */
 export function MetricsCarousel({ metrics }: { metrics: MetricSlide[] }) {
   const [active, setActive] = useState(0);
-  const [engaged, setEngaged] = useState(false);
+  const [held, setHeld] = useState(false);
   const [direction, setDirection] = useState<1 | -1>(1);
   const reduced = useReducedMotion();
+  const visible = usePageVisible();
   const count = metrics.length;
 
   const go = useCallback(
-    (next: number, manual = true) => {
+    (next: number) => {
       if (count === 0) return;
-      if (manual) setEngaged(true);
       setDirection(next > active ? 1 : -1);
       setActive(((next % count) + count) % count);
     },
@@ -67,13 +67,12 @@ export function MetricsCarousel({ metrics }: { metrics: MetricSlide[] }) {
   const next = useCallback(() => go(active + 1), [active, go]);
   const previous = useCallback(() => go(active - 1), [active, go]);
 
-  useAutoAdvance(
-    useCallback(() => {
-      setDirection(1);
-      setActive((current) => (current + 1) % Math.max(count, 1));
-    }, [count]),
-    { paused: engaged || count < 2, interval: 3800 },
-  );
+  // Runs on its own every three seconds; a manual move just re-arms the timer.
+  useAutoAdvance(next, {
+    interval: 3000,
+    paused: held || !visible || count < 2,
+    resetKey: active,
+  });
 
   const swipe = useSwipe({ onNext: next, onPrevious: previous, axis: "x" });
   const current = metrics[active];
@@ -96,7 +95,8 @@ export function MetricsCarousel({ metrics }: { metrics: MetricSlide[] }) {
           previous();
         }
       }}
-      onMouseEnter={() => setEngaged(true)}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
       {...swipe}
       className="relative select-none focus-visible:outline-none"
     >

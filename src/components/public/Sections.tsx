@@ -6,7 +6,6 @@ import { ClientsMarquee } from "@/components/public/ClientsMarquee";
 import { MetricsCarousel } from "@/components/public/MetricsCarousel";
 import { ProjectCard } from "@/components/public/ProjectCard";
 import { ServicesSlider } from "@/components/public/ServicesSlider";
-import { SkillsIllustration } from "@/components/public/SkillsIllustration";
 import { TestimonialsSlider } from "@/components/public/TestimonialsSlider";
 import { Container } from "@/components/ui/Container";
 import { Crosshair, DataTicks, TechLabel } from "@/components/ui/Decor";
@@ -133,6 +132,7 @@ export function ServicesSection({
       />
       <Reveal from="blur" delay={120} className="mt-12">
         <ServicesSlider
+          brand={copy("hero.name")}
           services={services.map((service) => ({
             id: service.id,
             title: pick(service.title, locale),
@@ -238,44 +238,30 @@ export function SkillsSection({
     groups.set(key, [...(groups.get(key) ?? []), skill]);
   }
 
+  // A plain, quiet list: one short column per category on desktop, stacked on
+  // phones. No pills, no illustration — the section stays out of the way.
   return (
-    <Container as="section" id="skills" className={SECTION}>
-      <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-        <div className="lg:col-span-7">
-          <SectionHeading
-            index="05"
-            eyebrow={copy("skills.eyebrow")}
-            title={copy("skills.heading")}
-            intro={copy("skills.intro")}
-          />
+    <Container as="section" id="skills" className="border-t border-[var(--color-line)] py-16 lg:py-20">
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        <span className="label text-accent">05</span>
+        <span className="label">{copy("skills.eyebrow")}</span>
+        <h2 className="display text-[clamp(1.5rem,3vw,2.25rem)]">{copy("skills.heading")}</h2>
+      </div>
 
-          <div className="mt-10 space-y-6">
-            {[...groups.entries()].map(([category, items], groupIndex) => (
-              <Reveal
-                key={category}
-                from="up"
-                delay={groupIndex * 70}
-                className="grid gap-3 border-t border-[var(--color-line)] pt-4 sm:grid-cols-12"
-              >
-                <p className="label sm:col-span-3">{category}</p>
-                <ul className="flex flex-wrap gap-2 sm:col-span-9">
-                  {items.map((skill) => (
-                    <li
-                      key={skill.id}
-                      className="rounded-full border border-[var(--color-line)] px-3.5 py-1.5 text-xs text-offwhite/80 transition-colors duration-300 hover:border-accent hover:text-accent"
-                    >
-                      {pick(skill.name, locale)}
-                    </li>
-                  ))}
-                </ul>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-
-        <Reveal from="blur" delay={160} className="hidden lg:col-span-5 lg:block">
-          <SkillsIllustration className="h-auto w-full max-w-[420px] opacity-90" />
-        </Reveal>
+      {/* CSS columns rather than a grid, so short categories don't leave holes. */}
+      <div className="mt-8 gap-x-10 border-t border-[var(--color-line)] pt-8 sm:columns-2 lg:columns-4">
+        {[...groups.entries()].map(([category, items], groupIndex) => (
+          <Reveal key={category} from="up" delay={groupIndex * 60} className="mb-8 break-inside-avoid">
+            <p className="label text-[0.625rem] text-accent">{category}</p>
+            <ul className="mt-3 space-y-1.5">
+              {items.map((skill) => (
+                <li key={skill.id} className="text-sm text-muted">
+                  {pick(skill.name, locale)}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        ))}
       </div>
     </Container>
   );

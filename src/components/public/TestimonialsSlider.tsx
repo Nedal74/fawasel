@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { useCallback, useState } from "react";
 
-import { useAutoAdvance } from "@/hooks/useAutoAdvance";
+import { useAutoAdvance, usePageVisible } from "@/hooks/useAutoAdvance";
 import { useSwipe } from "@/hooks/useSwipe";
 import { cn } from "@/lib/utils";
 
@@ -19,24 +19,23 @@ export type TestimonialSlide = {
 /** Image-led testimonial slider: portrait on one side, large quote on the other. */
 export function TestimonialsSlider({ testimonials }: { testimonials: TestimonialSlide[] }) {
   const [active, setActive] = useState(0);
-  const [engaged, setEngaged] = useState(false);
+  const [held, setHeld] = useState(false);
+  const visible = usePageVisible();
   const count = testimonials.length;
 
   const go = useCallback(
-    (next: number, manual = true) => {
-      if (manual) setEngaged(true);
-      setActive(((next % count) + count) % count);
-    },
+    (next: number) => setActive(((next % count) + count) % count),
     [count],
   );
 
   const next = useCallback(() => go(active + 1), [active, go]);
   const previous = useCallback(() => go(active - 1), [active, go]);
 
-  useAutoAdvance(
-    useCallback(() => setActive((current) => (current + 1) % Math.max(count, 1)), [count]),
-    { paused: engaged || count < 2, interval: 6000 },
-  );
+  useAutoAdvance(next, {
+    interval: 6000,
+    paused: held || !visible || count < 2,
+    resetKey: active,
+  });
 
   const swipe = useSwipe({ onNext: next, onPrevious: previous, axis: "x" });
   const current = testimonials[active];
@@ -58,7 +57,8 @@ export function TestimonialsSlider({ testimonials }: { testimonials: Testimonial
           previous();
         }
       }}
-      onMouseEnter={() => setEngaged(true)}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
       {...swipe}
       className="grid select-none gap-8 focus-visible:outline-none lg:grid-cols-12 lg:gap-12"
     >

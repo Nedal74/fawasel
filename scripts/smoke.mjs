@@ -101,6 +101,13 @@ await page.getByRole("button", { name: "Next service" }).click();
 await page.waitForTimeout(900);
 check("services slider advances", (await activeService()) !== serviceBefore);
 
+// Both sliders move on their own, without any interaction, roughly every 3s.
+await page.mouse.move(5, 5);
+const liveService = () => page.locator('#services [aria-live="polite"]').textContent();
+const serviceIdle = await liveService();
+await page.waitForTimeout(3400);
+check("services slider advances on its own", (await liveService()) !== serviceIdle, serviceIdle);
+
 // Metrics: the large number changes when advancing.
 await page.locator("#intelligence").scrollIntoViewIfNeeded();
 const liveMetric = () => page.locator('#intelligence [aria-live="polite"]').textContent();
@@ -108,6 +115,11 @@ const metricBefore = await liveMetric();
 await page.getByRole("button", { name: "Next metric" }).click();
 await page.waitForTimeout(900);
 check("metrics carousel advances", (await liveMetric()) !== metricBefore, `${metricBefore}`);
+
+await page.mouse.move(5, 5);
+const metricIdle = await liveMetric();
+await page.waitForTimeout(3400);
+check("metrics advance on their own", (await liveMetric()) !== metricIdle, `${metricIdle}`);
 
 // Homepage order must match the V2 spec.
 const order = await page.evaluate(() =>
