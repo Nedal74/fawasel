@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import { LEGACY_COPY, seedData } from "./defaults";
+import { LEGACY_COPY, LEGACY_SERVICE_CATEGORY, seedData } from "./defaults";
 import { getStore } from "./store";
 import type {
   Article,
@@ -124,9 +124,20 @@ export const getArticleBySlug = cache(async (slug: string): Promise<Article | nu
   return rows.find((article) => article.slug === slug && article.published) ?? null;
 });
 
-export const getServices = cache(async (): Promise<Service[]> =>
-  byOrder(publishedOnly(await listAll("services"))),
-);
+export const getServices = cache(async (): Promise<Service[]> => {
+  const seeded = new Map(seedData().services.map((service) => [service.id, service]));
+
+  // V2 split the single "Marketing" category into two, which the About pills
+  // group by. A service still carrying the old default follows the split; an
+  // edited category is left alone.
+  return byOrder(publishedOnly(await listAll("services"))).map((service) => {
+    const untouched =
+      service.category?.en === LEGACY_SERVICE_CATEGORY.en &&
+      service.category?.ar === LEGACY_SERVICE_CATEGORY.ar;
+    const seed = seeded.get(service.id);
+    return untouched && seed ? { ...service, category: seed.category } : service;
+  });
+});
 
 export const getSkills = cache(async (): Promise<Skill[]> =>
   byOrder(publishedOnly(await listAll("skills"))),

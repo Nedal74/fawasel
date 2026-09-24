@@ -137,6 +137,19 @@ check(
   !order.includes("experience") && !order.includes("tools"),
 );
 
+// About section drops the services into two piles.
+await page.locator("#about").scrollIntoViewIfNeeded();
+await page.waitForTimeout(2600);
+const pileBoxes = await page.locator("#about ul").count();
+const pills = await page.locator("#about ul li").count();
+check("about section shows two service piles", pileBoxes === 2, `${pileBoxes} boxes`);
+check("service pills dropped in", pills >= 10, `${pills} pills`);
+const landed = await page.evaluate(() => {
+  const pill = document.querySelector("#about ul li span");
+  return pill ? getComputedStyle(pill).transform : "";
+});
+check("pills settled at an angle", landed.startsWith("matrix") && landed !== "none", landed.slice(0, 40));
+
 // Floating WhatsApp button is present and points at the CMS number.
 check(
   "floating WhatsApp button",

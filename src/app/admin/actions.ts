@@ -262,6 +262,7 @@ export async function saveSettingsAction(
     heroImage: String(formData.get("heroImage") ?? "").trim(),
     heroRevealImage: String(formData.get("heroRevealImage") ?? "").trim(),
     aboutImage: String(formData.get("aboutImage") ?? "").trim(),
+    aboutMedia: formData.get("aboutMedia") === "image" ? "image" : "pills",
     sections,
   };
 

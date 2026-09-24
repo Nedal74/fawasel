@@ -20,6 +20,9 @@ function stamp<K extends CollectionName>(
   return { ...doc, id, createdAt: now, updatedAt: now } as CollectionMap[K];
 }
 
+/** Services that belong to the marketing box; the rest go to the creative one. */
+const MARKETING_SERVICES = new Set(["marketing-strategy", "brand-strategy", "digital-marketing", "social-media", "performance-marketing", "real-estate-marketing", "campaign-management", "lead-generation", "marketing-consulting", "media-buying"]);
+
 const serviceSeed: [string, string, string, string, string][] = [
   ["marketing-strategy", "Marketing Strategy", "استراتيجية التسويق", "Business-first marketing plans built on market, offer and audience analysis.", "خطط تسويقية تبدأ من فهم النشاط التجاري والسوق والجمهور والعرض."],
   ["brand-strategy", "Brand Strategy", "استراتيجية العلامة", "Positioning, messaging and identity direction that make the brand defensible.", "التموضع والرسائل واتجاه الهوية بما يمنح العلامة تميزًا حقيقيًا."],
@@ -169,6 +172,9 @@ export const LEGACY_COPY: Record<string, Localized> = {
   "intelligence.heading": L("THE NUMBERS BEHIND THE WORK", "الأرقام خلف العمل"),
 };
 
+/** The single category every service shipped with before the two-box split. */
+export const LEGACY_SERVICE_CATEGORY: Localized = L("Marketing", "التسويق");
+
 export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
   return {
     projects: [],
@@ -185,7 +191,9 @@ export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
         shortDescription: L(den, dar),
         longDescription: EMPTY,
         icon: id,
-        category: L("Marketing", "التسويق"),
+        category: MARKETING_SERVICES.has(id)
+          ? L("Marketing & Performance", "تسويق وأداء")
+          : L("Creative & Content", "إبداع ومحتوى"),
         ctaLabel: L("Explore service", "تفاصيل الخدمة"),
         ctaUrl: "/contact",
         featured: i < 6,
@@ -272,6 +280,7 @@ export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
         heroImage: "/images/portrait-hero.svg",
         heroRevealImage: "",
         aboutImage: "/images/portrait-about.svg",
+        aboutMedia: "pills",
         sections: {
           about: true,
           services: true,

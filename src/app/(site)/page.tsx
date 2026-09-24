@@ -87,7 +87,14 @@ export default async function HomePage() {
 
       {/* 02 — ABOUT */}
       {enabled("about") ? (
-        <AboutSection copy={copy} strings={strings} image={settings.aboutImage} />
+        <AboutSection
+          copy={copy}
+          strings={strings}
+          image={settings.aboutImage}
+          media={settings.aboutMedia}
+          services={services}
+          locale={locale}
+        />
       ) : null}
 
       {/* 03 — SERVICES */}

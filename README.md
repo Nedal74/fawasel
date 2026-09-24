@@ -191,6 +191,13 @@ Deliberately **empty**: projects, experience, testimonials and tools. Nothing wa
 invented — the site renders elegant empty states until real records are entered.
 The same applies to imagery: `public/images/portrait-*.svg` are placeholders.
 
+### About section media
+
+**Settings → Imagery → About section shows** switches the About media column
+between the services pile (default) and the second portrait. The pile drops each
+service name into one of two boxes, grouped by the service's own category, so
+adding a service in the dashboard adds a pill with no code change.
+
 ### Articles
 
 `/articles` and `/articles/<slug>` are CMS-powered. The body is plain text: a

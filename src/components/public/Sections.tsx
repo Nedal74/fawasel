@@ -5,6 +5,7 @@ import { ArticleCard } from "@/components/public/ArticleCard";
 import { ClientsMarquee } from "@/components/public/ClientsMarquee";
 import { MetricsCarousel } from "@/components/public/MetricsCarousel";
 import { ProjectCard } from "@/components/public/ProjectCard";
+import { ServicePillsDrop, type PillGroup } from "@/components/public/ServicePillsDrop";
 import { ServicesSlider } from "@/components/public/ServicesSlider";
 import { TestimonialsSlider } from "@/components/public/TestimonialsSlider";
 import { Container } from "@/components/ui/Container";
@@ -35,36 +36,73 @@ export function AboutSection({
   copy,
   image,
   strings,
+  media = "image",
+  services = [],
+  locale,
 }: {
   copy: Copy;
   image: string;
   strings: UiStrings;
+  /** Services pile (default) or the second portrait, chosen in Settings. */
+  media?: "pills" | "image";
+  services?: Service[];
+  locale?: Locale;
 }) {
   const primaryLabel = copy("about.ctaPrimary") || strings.viewAllWork;
   const secondaryLabel = copy("about.ctaSecondary") || strings.startProject;
+
+  // Two boxes, filled from the services' own categories.
+  const pillGroups: PillGroup[] = [];
+  if (media === "pills" && locale) {
+    const byCategory = new Map<string, PillGroup>();
+    for (const service of services) {
+      const title = pick(service.category, locale) || strings.services;
+      const group = byCategory.get(title) ?? { id: title, title, items: [] };
+      group.items.push({ id: service.id, label: pick(service.title, locale) });
+      byCategory.set(title, group);
+    }
+    const all = [...byCategory.values()];
+    // More than two categories would make the column unreadable, so anything
+    // past the first two folds into the second box.
+    if (all.length > 2) {
+      const [first, second, ...rest] = all;
+      pillGroups.push(first, {
+        ...second,
+        items: [...second.items, ...rest.flatMap((group) => group.items)],
+      });
+    } else {
+      pillGroups.push(...all);
+    }
+  }
+
+  const showPills = media === "pills" && pillGroups.length > 0;
 
   return (
     <Container as="section" id="about" className={`relative ${SECTION}`}>
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
         <Reveal from="left" className="relative lg:col-span-5">
-          <figure className="relative aspect-[4/5] overflow-hidden border border-[var(--color-line)] bg-graphite">
-            {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={image}
-                alt={copy("hero.name")}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover object-top"
-              />
-            ) : (
-              <div className="grid-field h-full w-full opacity-60" aria-hidden />
-            )}
-            <Crosshair className="-left-1.5 -top-1.5" />
-            <Crosshair className="-bottom-1.5 -right-1.5" />
-          </figure>
+          {showPills ? (
+            <ServicePillsDrop groups={pillGroups} />
+          ) : (
+            <figure className="relative aspect-[4/5] overflow-hidden border border-[var(--color-line)] bg-graphite">
+              {image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={image}
+                  alt={copy("hero.name")}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover object-top"
+                />
+              ) : (
+                <div className="grid-field h-full w-full opacity-60" aria-hidden />
+              )}
+              <Crosshair className="-left-1.5 -top-1.5" />
+              <Crosshair className="-bottom-1.5 -right-1.5" />
+            </figure>
+          )}
           <div className="mt-4 flex items-center justify-between">
-            <TechLabel>FIG. 01 — PROFILE</TechLabel>
+            <TechLabel>{showPills ? "FIG. 01 — SERVICES" : "FIG. 01 — PROFILE"}</TechLabel>
             <DataTicks count={16} className="h-3" />
           </div>
         </Reveal>

@@ -203,6 +203,8 @@ export interface SiteSettings extends BaseDoc {
   heroImage: string;
   heroRevealImage: string;
   aboutImage: string;
+  /** What fills the About section's media column. */
+  aboutMedia: "pills" | "image";
   sections: Record<string, boolean>;
 }
 

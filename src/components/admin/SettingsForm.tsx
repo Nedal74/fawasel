@@ -200,6 +200,21 @@ export function SettingsForm({
             t={t}
           />
           <MediaPicker name="aboutImage" label={t.aboutImageField} defaultValue={settings.aboutImage} library={media} t={t} />
+          <div>
+            <label className="admin-label" htmlFor="aboutMedia">
+              {t.aboutMediaField}
+            </label>
+            <select
+              id="aboutMedia"
+              name="aboutMedia"
+              defaultValue={settings.aboutMedia ?? "pills"}
+              className="admin-input"
+            >
+              <option value="pills">{t.aboutMediaPills}</option>
+              <option value="image">{t.aboutMediaImage}</option>
+            </select>
+            <p className="mt-1.5 text-[0.6875rem] text-dim">{t.aboutMediaHelp}</p>
+          </div>
         </div>
       </section>
 
