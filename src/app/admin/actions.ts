@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getCollectionConfig, type CollectionConfig, type Field } from "@/lib/cms/collections";
+import { seedStarterContent } from "@/lib/cms/seed";
 import { getStore, supabaseConfigured } from "@/lib/cms/store";
 import type { CollectionName, SiteSettings } from "@/lib/cms/types";
 import { createSession, destroySession, requireSession, verifyCredentials } from "@/lib/auth";
@@ -296,6 +297,15 @@ export async function saveContentAction(
 
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/** Fills an empty database with the starter content (fresh Supabase project). */
+export async function seedStarterContentAction(): Promise<void> {
+  await requireSession();
+  const store = await getStore();
+  await seedStarterContent(store);
+  revalidatePath("/", "layout");
+  redirect("/admin?seeded=1");
 }
 
 export async function deleteMediaAction(id: string): Promise<void> {

@@ -50,6 +50,10 @@ export const adminStrings = {
     createFirstProject: "Create the first project",
     notWritable:
       "The JSON data file is not writable in this environment, so edits will not persist. Configure Supabase (see README) for a production-grade data layer.",
+    emptyDatabase:
+      "This database is empty. Load the starter content (site copy, services, skills, clients, metrics, social links, navigation) to get going — it never overwrites existing rows.",
+    loadStarterContent: "Load starter content",
+    seeded: "Starter content loaded.",
     dataLayer: "Data layer",
     activeAdapter: "Active adapter:",
     jsonNote:
@@ -196,6 +200,10 @@ export const adminStrings = {
     createFirstProject: "أضف أول مشروع",
     notWritable:
       "ملف البيانات غير قابل للكتابة في هذه البيئة، لذلك لن تُحفظ التعديلات. اضبط Supabase (راجع README) لقاعدة بيانات جاهزة للإنتاج.",
+    emptyDatabase:
+      "قاعدة البيانات فارغة. حمّل المحتوى المبدئي (نصوص الموقع، الخدمات، المهارات، العملاء، الأرقام، روابط التواصل، القائمة) للبدء — ولن يُستبدل أي سجل موجود.",
+    loadStarterContent: "تحميل المحتوى المبدئي",
+    seeded: "تم تحميل المحتوى المبدئي.",
     dataLayer: "مصدر البيانات",
     activeAdapter: "المصدر الحالي:",
     jsonNote: " — تخزين في ملف data/cms.json. اضبط متغيرات Supabase للتبديل بدون تعديل الكود.",

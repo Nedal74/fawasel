@@ -1,15 +1,23 @@
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, ArrowRight, Sprout } from "lucide-react";
 import Link from "next/link";
 
 import { getAdminStrings } from "@/i18n/admin";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { adminCollections, collectionLabel } from "@/lib/cms/collections";
 import { listAdmin } from "@/lib/cms/admin";
+import { seedStarterContentAction } from "@/app/admin/actions";
+import { isDatabaseEmpty } from "@/lib/cms/seed";
 import { getStore } from "@/lib/cms/store";
 import type { Inquiry } from "@/lib/cms/types";
 
-export default async function AdminHome() {
+export default async function AdminHome({
+  searchParams,
+}: {
+  searchParams: Promise<{ seeded?: string }>;
+}) {
+  const { seeded } = await searchParams;
   const store = await getStore();
+  const empty = await isDatabaseEmpty(store);
   const counts = await Promise.all(
     adminCollections.map(async (config) => {
       const rows = (await store.list(config.name)) as { published?: boolean }[];
@@ -36,6 +44,29 @@ export default async function AdminHome() {
         <h1 className="display mt-2 text-3xl">{t.dashboardTitle}</h1>
         <p className="mt-2 text-sm text-muted">{t.dashboardIntro}</p>
       </header>
+
+      {seeded ? (
+        <p className="rounded border border-[var(--color-line)] bg-graphite p-4 text-sm text-emerald-400">
+          {t.seeded}
+        </p>
+      ) : null}
+
+      {empty ? (
+        <div className="rounded border border-[var(--color-line)] bg-graphite p-5">
+          <p className="flex items-start gap-3 text-sm text-muted">
+            <Sprout className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+            {t.emptyDatabase}
+          </p>
+          <form action={seedStarterContentAction} className="mt-4">
+            <button
+              type="submit"
+              className="btn-accent inline-flex items-center gap-2 rounded px-5 py-2.5 text-[0.6875rem] font-medium uppercase tracking-[0.12em]"
+            >
+              {t.loadStarterContent}
+            </button>
+          </form>
+        </div>
+      ) : null}
 
       {!store.writable ? (
         <p className="flex items-start gap-3 rounded border border-[var(--color-line)] bg-graphite p-4 text-sm text-muted">

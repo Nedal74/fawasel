@@ -48,6 +48,7 @@ end;
 $$ language plpgsql;
 
 call create_cms_table('projects');
+call create_cms_table('articles');
 call create_cms_table('clients');
 call create_cms_table('services');
 call create_cms_table('skills');
@@ -69,6 +70,10 @@ drop policy if exists inquiries_read_published on public.inquiries;
 -- Uniqueness / lookup indexes ----------------------------------------------
 create unique index if not exists projects_slug_key
   on public.projects ((data->>'slug'));
+create unique index if not exists articles_slug_key
+  on public.articles ((data->>'slug'));
+create index if not exists articles_date_idx
+  on public.articles ((data->>'date') desc);
 create index if not exists projects_featured_idx
   on public.projects (((data->>'featured')::boolean));
 create unique index if not exists site_content_key_key
@@ -77,11 +82,21 @@ create index if not exists media_assets_created_idx
   on public.media_assets (created_at desc);
 
 -- Storage bucket for the media library --------------------------------------
-insert into storage.buckets (id, name, public)
-values ('media', 'media', true)
-on conflict (id) do nothing;
+-- Guarded so the file also runs on a plain Postgres (no `storage` schema).
+do $$
+begin
+  if exists (select 1 from information_schema.schemata where schema_name = 'storage') then
+    execute $q$
+      insert into storage.buckets (id, name, public)
+      values ('media', 'media', true)
+      on conflict (id) do nothing
+    $q$;
 
--- Public read of media; uploads go through the server (service role).
-drop policy if exists "media public read" on storage.objects;
-create policy "media public read" on storage.objects
-  for select using (bucket_id = 'media');
+    -- Public read of media; uploads go through the server (service role).
+    execute $q$drop policy if exists "media public read" on storage.objects$q$;
+    execute $q$
+      create policy "media public read" on storage.objects
+        for select using (bucket_id = 'media')
+    $q$;
+  end if;
+end $$;

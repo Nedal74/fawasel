@@ -284,12 +284,18 @@ non-default credentials.
 
 ## Deployment
 
+A complete, free path (GitHub + Supabase Free + Vercel Hobby) is written up in
+Arabic, step by step, in [`docs/DEPLOY-AR.md`](docs/DEPLOY-AR.md). In short:
+
 1. Run `supabase/schema.sql` and set the Supabase variables (required — a
    serverless filesystem cannot persist the JSON adapter).
 2. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_SESSION_SECRET` and
    `NEXT_PUBLIC_SITE_URL`.
 3. `npm run build` → `npm start` (or deploy to any Next.js host).
-4. Sign in at `/admin`, upload the portrait and publish the first case study.
+4. Sign in at `/admin`. A fresh database shows a **Load starter content**
+   button that inserts the site copy, services, skills, clients, metrics,
+   social links and navigation; it only fills collections that are empty.
+5. Upload the portrait and publish the first case study.
 
 `/admin` and `/api` are excluded from `robots.txt`, and the dashboard sets
 `noindex`.
