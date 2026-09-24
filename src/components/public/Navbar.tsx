@@ -85,7 +85,7 @@ export function Navbar({
               aria-current={isActive(item.href) ? "page" : undefined}
               className={cn(
                 "relative rounded-full px-4 py-2 text-[0.6875rem] uppercase tracking-[0.18em] transition-colors",
-                isActive(item.href) ? "text-offwhite" : "text-muted hover:text-offwhite",
+                isActive(item.href) ? "text-accent" : "text-muted hover:text-offwhite",
               )}
             >
               {item.label}
@@ -101,7 +101,7 @@ export function Navbar({
           <LanguageToggle locale={locale} label={languageLabel} className="px-2" />
           <Link
             href="/contact"
-            className="btn-shine ms-1 rounded-full bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-5 py-2 text-[0.6875rem] font-medium uppercase tracking-[0.18em] text-[#0a0a0b]"
+            className="btn-shine btn-accent ms-1 rounded-full px-5 py-2 text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
           >
             {ctaLabel}
           </Link>
@@ -146,7 +146,7 @@ export function Navbar({
             <Link
               href="/contact"
               onClick={() => setOpen(false)}
-              className="btn-shine rounded-full bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-[0.18em] text-[#0a0a0b]"
+              className="btn-shine btn-accent rounded-full px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
             >
               {ctaLabel}
             </Link>

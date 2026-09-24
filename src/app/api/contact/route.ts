@@ -6,11 +6,12 @@ import { getStore } from "@/lib/cms/store";
 const schema = z.object({
   name: z.string().trim().min(1).max(120),
   company: z.string().trim().max(160).optional().default(""),
-  email: z.string().trim().email().max(160),
-  phone: z.string().trim().max(60).optional().default(""),
+  // Only name and phone are required on the public form.
+  email: z.union([z.string().trim().email().max(160), z.literal("")]).optional().default(""),
+  phone: z.string().trim().min(5).max(60),
   service: z.string().trim().max(160).optional().default(""),
   budget: z.string().trim().max(80).optional().default(""),
-  brief: z.string().trim().min(1).max(4000),
+  brief: z.string().trim().max(4000).optional().default(""),
 });
 
 /** Strips tags and control characters so stored text is safe to render back. */

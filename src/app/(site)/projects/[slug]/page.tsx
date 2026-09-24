@@ -272,7 +272,7 @@ export default async function ProjectPage({ params }: Params) {
         <div className="mt-9 flex flex-wrap justify-center gap-3">
           <Link
             href="/contact"
-            className="btn-shine rounded-full bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.18em] text-[#0a0a0b]"
+            className="btn-shine rounded-full btn-accent px-7 py-3.5 text-xs font-medium uppercase tracking-[0.18em]"
           >
             {strings.startProject}
           </Link>

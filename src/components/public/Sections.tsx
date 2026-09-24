@@ -1,28 +1,34 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
+import { ArticleCard } from "@/components/public/ArticleCard";
+import { ClientsMarquee } from "@/components/public/ClientsMarquee";
+import { MetricsCarousel } from "@/components/public/MetricsCarousel";
 import { ProjectCard } from "@/components/public/ProjectCard";
+import { ServicesSlider } from "@/components/public/ServicesSlider";
+import { SkillsIllustration } from "@/components/public/SkillsIllustration";
+import { TestimonialsSlider } from "@/components/public/TestimonialsSlider";
 import { Container } from "@/components/ui/Container";
-import { CountUp } from "@/components/ui/CountUp";
 import { Crosshair, DataTicks, TechLabel } from "@/components/ui/Decor";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import type { UiStrings } from "@/i18n/strings";
 import type {
+  Article,
   Client,
-  ExperienceEntry,
   Locale,
   Metric,
   Project,
   Service,
   Skill,
   Testimonial,
-  Tool,
 } from "@/lib/cms/types";
 import { pick } from "@/lib/locale";
 
 type Copy = (key: string) => string;
+
+const SECTION = "border-t border-[var(--color-line)] py-24 lg:py-32";
 
 /* ---------------------------------------------------------------- About -- */
 
@@ -35,11 +41,14 @@ export function AboutSection({
   image: string;
   strings: UiStrings;
 }) {
+  const primaryLabel = copy("about.ctaPrimary") || strings.viewAllWork;
+  const secondaryLabel = copy("about.ctaSecondary") || strings.startProject;
+
   return (
-    <Container as="section" id="about" className="relative border-t border-[var(--color-line)] py-24 lg:py-36">
+    <Container as="section" id="about" className={`relative ${SECTION}`}>
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-        <Reveal className="relative lg:col-span-5">
-          <div className="relative aspect-[4/5] overflow-hidden border border-[var(--color-line)] bg-graphite">
+        <Reveal from="left" className="relative lg:col-span-5">
+          <figure className="relative aspect-[4/5] overflow-hidden border border-[var(--color-line)] bg-graphite">
             {image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -54,7 +63,7 @@ export function AboutSection({
             )}
             <Crosshair className="-left-1.5 -top-1.5" />
             <Crosshair className="-bottom-1.5 -right-1.5" />
-          </div>
+          </figure>
           <div className="mt-4 flex items-center justify-between">
             <TechLabel>FIG. 01 — PROFILE</TechLabel>
             <DataTicks count={16} className="h-3" />
@@ -63,28 +72,35 @@ export function AboutSection({
 
         <div className="lg:col-span-7 lg:pt-6">
           <SectionHeading
-            index="01"
+            index="02"
             eyebrow={copy("about.eyebrow")}
             title={copy("about.heading")}
+            from="right"
           />
-          <Reveal delay={80}>
-            <p className="mt-8 text-lg leading-relaxed text-offwhite/90">{copy("about.lead")}</p>
+          <Reveal from="up" delay={120}>
+            <p className="mt-8 text-[clamp(1.05rem,2vw,1.4rem)] leading-relaxed text-offwhite">
+              {copy("about.lead")}
+            </p>
             <p className="mt-6 text-sm leading-relaxed text-muted">{copy("about.body")}</p>
             <p className="mt-4 text-sm leading-relaxed text-muted">{copy("about.body2")}</p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link
-                href="/projects"
-                className="rounded-full border border-[var(--color-line-strong)] px-6 py-3 text-[0.6875rem] uppercase tracking-[0.18em] transition-colors hover:border-accent"
-              >
-                {strings.viewAllWork}
-              </Link>
-              <Link
-                href="/contact"
-                className="btn-shine rounded-full bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-6 py-3 text-[0.6875rem] font-medium uppercase tracking-[0.18em] text-[#0a0a0b]"
-              >
-                {strings.startProject}
-              </Link>
-            </div>
+            <blockquote className="mt-8 border-s-2 border-accent ps-5 text-base leading-relaxed text-offwhite/90">
+              {copy("hero.philosophy")}
+            </blockquote>
+          </Reveal>
+
+          <Reveal from="left" delay={220} className="mt-10 flex flex-wrap gap-3">
+            <Link
+              href={copy("about.ctaPrimaryUrl") || "/projects"}
+              className="btn-shine btn-accent rounded-full px-7 py-3.5 text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
+            >
+              {primaryLabel}
+            </Link>
+            <Link
+              href={copy("about.ctaSecondaryUrl") || "/contact"}
+              className="rounded-full border border-[var(--color-line-strong)] px-7 py-3.5 text-[0.6875rem] uppercase tracking-[0.18em] transition-colors hover:border-accent hover:text-accent"
+            >
+              {secondaryLabel}
+            </Link>
           </Reveal>
         </div>
       </div>
@@ -98,61 +114,124 @@ export function ServicesSection({
   services,
   locale,
   copy,
-  limit,
+  strings,
 }: {
   services: Service[];
   locale: Locale;
   copy: Copy;
-  limit?: number;
+  strings: UiStrings;
 }) {
-  const shown = limit ? services.slice(0, limit) : services;
+  if (services.length === 0) return null;
+
   return (
-    <Container as="section" id="services" className="border-t border-[var(--color-line)] py-24 lg:py-36">
+    <Container as="section" id="services" className={SECTION}>
       <SectionHeading
-        index="02"
+        index="03"
         eyebrow={copy("services.eyebrow")}
         title={copy("services.heading")}
         intro={copy("services.intro")}
       />
-      <ul className="mt-14 grid grid-cols-1 gap-px border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-2 lg:grid-cols-3">
-        {shown.map((service, i) => (
-          <Reveal as="li" key={service.id} delay={(i % 3) * 70} className="group bg-void p-7">
-            <div className="flex items-start justify-between">
-              <TechLabel>{String(i + 1).padStart(2, "0")}</TechLabel>
+      <Reveal from="blur" delay={120} className="mt-12">
+        <ServicesSlider
+          services={services.map((service) => ({
+            id: service.id,
+            title: pick(service.title, locale),
+            description: pick(service.shortDescription, locale),
+            category: pick(service.category, locale),
+            ctaLabel: pick(service.ctaLabel, locale) || strings.exploreService,
+            ctaUrl: service.ctaUrl || "/contact",
+          }))}
+        />
+      </Reveal>
+    </Container>
+  );
+}
+
+/* ------------------------------------------------------------ Work grid -- */
+
+export function WorkSection({
+  projects,
+  clients,
+  services,
+  locale,
+  copy,
+  strings,
+  showAllLink = true,
+}: {
+  projects: Project[];
+  clients: Client[];
+  services: Service[];
+  locale: Locale;
+  copy: Copy;
+  strings: UiStrings;
+  showAllLink?: boolean;
+}) {
+  return (
+    <Container as="section" id="work" className={SECTION}>
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeading
+          index="04"
+          eyebrow={copy("work.eyebrow")}
+          title={copy("work.heading")}
+          intro={copy("work.intro")}
+        />
+        {showAllLink ? (
+          <Reveal from="right">
+            <Link
+              href="/projects"
+              className="group inline-flex items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-accent"
+            >
+              {strings.viewAllWork}
               <ArrowUpRight
-                className="h-4 w-4 text-dim transition-colors group-hover:text-accent"
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                 aria-hidden
               />
-            </div>
-            <h3 className="mt-6 text-base font-semibold tracking-tight">
-              {pick(service.title, locale)}
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              {pick(service.shortDescription, locale)}
-            </p>
-            <span className="accent-rule mt-6 block h-px w-0 opacity-80 transition-all duration-500 group-hover:w-16" />
+            </Link>
           </Reveal>
-        ))}
-      </ul>
+        ) : null}
+      </div>
+
+      {projects.length > 0 ? (
+        <div className="mt-14 grid gap-x-10 gap-y-16 md:grid-cols-2">
+          {projects.map((project, i) => (
+            <Reveal
+              key={project.id}
+              from={i % 2 === 0 ? "left" : "right"}
+              delay={(i % 2) * 80}
+              className={i % 3 === 0 ? "md:col-span-2" : ""}
+            >
+              <ProjectCard
+                project={project}
+                locale={locale}
+                index={i}
+                eager={i === 0}
+                ctaLabel={strings.viewCaseStudy}
+                client={clients.find((client) => client.id === project.clientId)}
+                services={services.filter((service) => project.serviceIds.includes(service.id))}
+              />
+            </Reveal>
+          ))}
+        </div>
+      ) : (
+        <EmptyState className="mt-14" message={copy("work.empty")} />
+      )}
     </Container>
   );
 }
 
 /* --------------------------------------------------------------- Skills -- */
 
-export function CapabilitiesSection({
+export function SkillsSection({
   skills,
-  tools,
   locale,
   copy,
-  strings,
 }: {
   skills: Skill[];
-  tools: Tool[];
   locale: Locale;
   copy: Copy;
-  strings: UiStrings;
 }) {
+  if (skills.length === 0) return null;
+
   const groups = new Map<string, Skill[]>();
   for (const skill of skills) {
     const key = pick(skill.category, locale) || "—";
@@ -160,51 +239,43 @@ export function CapabilitiesSection({
   }
 
   return (
-    <Container as="section" id="skills" className="border-t border-[var(--color-line)] py-24 lg:py-36">
-      <SectionHeading
-        index="03"
-        eyebrow={copy("skills.eyebrow")}
-        title={copy("skills.heading")}
-        intro={copy("skills.intro")}
-      />
+    <Container as="section" id="skills" className={SECTION}>
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-7">
+          <SectionHeading
+            index="05"
+            eyebrow={copy("skills.eyebrow")}
+            title={copy("skills.heading")}
+            intro={copy("skills.intro")}
+          />
 
-      <div className="mt-14 space-y-px border border-[var(--color-line)] bg-[var(--color-line)]">
-        {[...groups.entries()].map(([category, items], groupIndex) => (
-          <Reveal key={category} className="grid gap-6 bg-void p-7 lg:grid-cols-12">
-            <div className="lg:col-span-3">
-              <span className="label text-accent">{String(groupIndex + 1).padStart(2, "0")}</span>
-              <h3 className="mt-2 text-lg font-semibold tracking-tight">{category}</h3>
-            </div>
-            <ul className="flex flex-wrap gap-2 lg:col-span-9">
-              {items.map((skill) => (
-                <li
-                  key={skill.id}
-                  className="rounded-full border border-[var(--color-line-strong)] px-4 py-2 text-xs text-offwhite/85 transition-colors hover:border-accent hover:text-offwhite"
-                >
-                  {pick(skill.name, locale)}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        ))}
-      </div>
-
-      <div className="mt-10">
-        <TechLabel>{strings.tools}</TechLabel>
-        {tools.length > 0 ? (
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {tools.map((tool) => (
-              <li
-                key={tool.id}
-                className="glass rounded px-3 py-1.5 text-[0.6875rem] uppercase tracking-[0.12em] text-muted"
+          <div className="mt-10 space-y-6">
+            {[...groups.entries()].map(([category, items], groupIndex) => (
+              <Reveal
+                key={category}
+                from="up"
+                delay={groupIndex * 70}
+                className="grid gap-3 border-t border-[var(--color-line)] pt-4 sm:grid-cols-12"
               >
-                {tool.name}
-              </li>
+                <p className="label sm:col-span-3">{category}</p>
+                <ul className="flex flex-wrap gap-2 sm:col-span-9">
+                  {items.map((skill) => (
+                    <li
+                      key={skill.id}
+                      className="rounded-full border border-[var(--color-line)] px-3.5 py-1.5 text-xs text-offwhite/80 transition-colors duration-300 hover:border-accent hover:text-accent"
+                    >
+                      {pick(skill.name, locale)}
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
             ))}
-          </ul>
-        ) : (
-          <p className="mt-4 text-sm text-dim">{strings.emptyTools}</p>
-        )}
+          </div>
+        </div>
+
+        <Reveal from="blur" delay={160} className="hidden lg:col-span-5 lg:block">
+          <SkillsIllustration className="h-auto w-full max-w-[420px] opacity-90" />
+        </Reveal>
       </div>
     </Container>
   );
@@ -221,93 +292,28 @@ export function IntelligenceSection({
   locale: Locale;
   copy: Copy;
 }) {
+  if (metrics.length === 0) return null;
+
   return (
-    <Container
-      as="section"
-      id="intelligence"
-      className="grain relative border-t border-[var(--color-line)] py-24 lg:py-36"
-    >
+    <Container as="section" id="intelligence" className={`grain relative ${SECTION}`}>
       <SectionHeading
-        index="04"
+        index="06"
         eyebrow={copy("intelligence.eyebrow")}
         title={copy("intelligence.heading")}
         intro={copy("intelligence.intro")}
       />
-      <dl className="mt-14 grid grid-cols-1 gap-px border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map((metric, i) => (
-          <Reveal key={metric.id} delay={(i % 4) * 60} className="relative bg-void p-7">
-            <dt className="label text-[0.625rem]">{pick(metric.label, locale)}</dt>
-            <dd className="mt-3 text-[clamp(2rem,4vw,3rem)] font-bold tracking-tight">
-              <span className="accent-text">
-                <CountUp value={metric.value} prefix={metric.prefix} suffix={metric.suffix} />
-              </span>
-            </dd>
-            {pick(metric.description, locale) ? (
-              <p className="mt-2 text-xs text-muted">{pick(metric.description, locale)}</p>
-            ) : null}
-            <DataTicks count={12} className="mt-5 h-3" />
-          </Reveal>
-        ))}
-      </dl>
-    </Container>
-  );
-}
-
-/* ------------------------------------------------------------ Work grid -- */
-
-export function WorkSection({
-  projects,
-  locale,
-  copy,
-  strings,
-  showAllLink = true,
-}: {
-  projects: Project[];
-  locale: Locale;
-  copy: Copy;
-  strings: UiStrings;
-  showAllLink?: boolean;
-}) {
-  return (
-    <Container as="section" id="work" className="border-t border-[var(--color-line)] py-24 lg:py-36">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <SectionHeading
-          index="05"
-          eyebrow={copy("work.eyebrow")}
-          title={copy("work.heading")}
-          intro={copy("work.intro")}
+      <Reveal from="up" delay={120} className="mt-14">
+        <MetricsCarousel
+          metrics={metrics.map((metric) => ({
+            id: metric.id,
+            label: pick(metric.label, locale),
+            value: metric.value,
+            prefix: metric.prefix,
+            suffix: metric.suffix,
+            description: pick(metric.description, locale),
+          }))}
         />
-        {showAllLink ? (
-          <Link
-            href="/projects"
-            className="group inline-flex items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-offwhite"
-          >
-            {strings.viewAllWork}
-            <ArrowUpRight
-              className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              aria-hidden
-            />
-          </Link>
-        ) : null}
-      </div>
-
-      {projects.length > 0 ? (
-        <div className="mt-14 grid gap-x-8 gap-y-14 md:grid-cols-2">
-          {projects.map((project, i) => (
-            <Reveal key={project.id} delay={(i % 2) * 80} className={i % 3 === 0 ? "md:col-span-2" : ""}>
-              <ProjectCard
-                project={project}
-                locale={locale}
-                index={i}
-                eager={i === 0}
-                ctaLabel={strings.viewCaseStudy}
-              />
-            </Reveal>
-          ))}
-        </div>
-      ) : (
-        <EmptyState className="mt-14" message={copy("work.empty")} />
-      )}
+      </Reveal>
     </Container>
   );
 }
@@ -324,128 +330,25 @@ export function ClientsSection({
   copy: Copy;
 }) {
   return (
-    <Container as="section" id="clients" className="border-t border-[var(--color-line)] py-24 lg:py-36">
-      <SectionHeading
-        index="06"
-        eyebrow={copy("clients.eyebrow")}
-        title={copy("clients.heading")}
-        intro={copy("clients.intro")}
-      />
-      {clients.length > 0 ? (
-        <ul className="mt-14 grid grid-cols-1 gap-px border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-2 lg:grid-cols-3">
-          {clients.map((client, i) => {
-            const name = pick(client.name, locale);
-            const body = (
-              <>
-                <div className="flex h-14 items-center">
-                  {client.logo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={client.logo}
-                      alt={name}
-                      loading="lazy"
-                      decoding="async"
-                      className="max-h-12 w-auto opacity-70 transition-opacity group-hover:opacity-100"
-                    />
-                  ) : (
-                    <span className="text-base font-medium tracking-tight text-offwhite/85">
-                      {name}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-6 flex items-center justify-between">
-                  <TechLabel>{pick(client.industry, locale)}</TechLabel>
-                  <TechLabel>{String(i + 1).padStart(2, "0")}</TechLabel>
-                </div>
-              </>
-            );
-            return (
-              <Reveal as="li" key={client.id} delay={(i % 3) * 60} className="group bg-void p-7">
-                {client.website ? (
-                  <a href={client.website} target="_blank" rel="noreferrer noopener" className="block">
-                    {body}
-                  </a>
-                ) : (
-                  body
-                )}
-              </Reveal>
-            );
-          })}
-        </ul>
-      ) : (
-        <EmptyState className="mt-14" message={copy("clients.empty")} />
-      )}
-    </Container>
-  );
-}
-
-/* ----------------------------------------------------------- Experience -- */
-
-export function ExperienceSection({
-  entries,
-  locale,
-  copy,
-}: {
-  entries: ExperienceEntry[];
-  locale: Locale;
-  copy: Copy;
-}) {
-  return (
-    <Container as="section" id="experience" className="border-t border-[var(--color-line)] py-24 lg:py-36">
+    <Container as="section" id="clients" className={SECTION}>
       <SectionHeading
         index="07"
-        eyebrow={copy("experience.eyebrow")}
-        title={copy("experience.heading")}
-        intro={copy("experience.intro")}
+        eyebrow={copy("clients.eyebrow")}
+        title={copy("clients.heading")}
       />
-      {entries.length > 0 ? (
-        <ol className="mt-14">
-          {entries.map((entry, i) => (
-            <Reveal
-              as="li"
-              key={entry.id}
-              delay={(i % 3) * 60}
-              className="grid gap-4 border-t border-[var(--color-line)] py-8 lg:grid-cols-12"
-            >
-              <div className="lg:col-span-3">
-                <TechLabel>
-                  {entry.startDate} — {entry.endDate || "PRESENT"}
-                </TechLabel>
-                {pick(entry.location, locale) ? (
-                  <p className="mt-1 text-xs text-dim">{pick(entry.location, locale)}</p>
-                ) : null}
-              </div>
-              <div className="lg:col-span-9">
-                <h3 className="text-lg font-semibold tracking-tight">{pick(entry.title, locale)}</h3>
-                <p className="mt-1 text-sm text-accent">{pick(entry.company, locale)}</p>
-                {pick(entry.description, locale) ? (
-                  <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
-                    {pick(entry.description, locale)}
-                  </p>
-                ) : null}
-                {pick(entry.achievements, locale) ? (
-                  <p className="mt-3 max-w-2xl whitespace-pre-line text-sm leading-relaxed text-offwhite/80">
-                    {pick(entry.achievements, locale)}
-                  </p>
-                ) : null}
-                {entry.skills.length > 0 ? (
-                  <ul className="mt-5 flex flex-wrap gap-2">
-                    {entry.skills.map((skill) => (
-                      <li
-                        key={skill}
-                        className="rounded-full border border-[var(--color-line)] px-3 py-1 text-[0.6875rem] text-muted"
-                      >
-                        {skill}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            </Reveal>
-          ))}
-        </ol>
+      {clients.length > 0 ? (
+        <Reveal from="up" delay={100} className="mt-12">
+          <ClientsMarquee
+            clients={clients.map((client) => ({
+              id: client.id,
+              name: pick(client.name, locale),
+              logo: client.logo,
+              website: client.website,
+            }))}
+          />
+        </Reveal>
       ) : (
-        <EmptyState className="mt-14" message={copy("experience.empty")} />
+        <EmptyState className="mt-12" message={copy("clients.empty")} />
       )}
     </Container>
   );
@@ -463,48 +366,82 @@ export function TestimonialsSection({
   copy: Copy;
 }) {
   return (
-    <Container
-      as="section"
-      id="testimonials"
-      className="border-t border-[var(--color-line)] py-24 lg:py-36"
-    >
+    <Container as="section" id="testimonials" className={SECTION}>
       <SectionHeading
         index="08"
         eyebrow={copy("testimonials.eyebrow")}
         title={copy("testimonials.heading")}
       />
       {testimonials.length > 0 ? (
-        <ul className="mt-14 grid gap-px border border-[var(--color-line)] bg-[var(--color-line)] md:grid-cols-2">
-          {testimonials.map((testimonial, i) => (
-            <Reveal as="li" key={testimonial.id} delay={(i % 2) * 70} className="bg-void p-8">
-              <blockquote className="text-base leading-relaxed text-offwhite/90">
-                “{pick(testimonial.quote, locale)}”
-              </blockquote>
-              <div className="mt-6 flex items-center gap-3 border-t border-[var(--color-line)] pt-5">
-                {testimonial.photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={testimonial.photo}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="h-10 w-10 rounded-full object-cover"
-                  />
-                ) : null}
-                <div>
-                  <p className="text-sm font-medium">{pick(testimonial.name, locale)}</p>
-                  <TechLabel>
-                    {[pick(testimonial.role, locale), pick(testimonial.company, locale)]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </TechLabel>
-                </div>
-              </div>
+        <Reveal from="up" delay={100} className="mt-12">
+          <TestimonialsSlider
+            testimonials={testimonials.map((testimonial) => ({
+              id: testimonial.id,
+              name: pick(testimonial.name, locale),
+              role: pick(testimonial.role, locale),
+              company: pick(testimonial.company, locale),
+              quote: pick(testimonial.quote, locale),
+              photo: testimonial.photo,
+            }))}
+          />
+        </Reveal>
+      ) : (
+        <EmptyState className="mt-12" message={copy("testimonials.empty")} />
+      )}
+    </Container>
+  );
+}
+
+/* ------------------------------------------------------------- Articles -- */
+
+export function ArticlesSection({
+  articles,
+  locale,
+  copy,
+  strings,
+  showAllLink = true,
+}: {
+  articles: Article[];
+  locale: Locale;
+  copy: Copy;
+  strings: UiStrings;
+  showAllLink?: boolean;
+}) {
+  return (
+    <Container as="section" id="articles" className={SECTION}>
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeading
+          index="09"
+          eyebrow={copy("articles.eyebrow")}
+          title={copy("articles.heading")}
+          intro={copy("articles.intro")}
+        />
+        {showAllLink && articles.length > 0 ? (
+          <Reveal from="right">
+            <Link
+              href="/articles"
+              className="group inline-flex items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em] text-muted transition-colors hover:text-accent"
+            >
+              {strings.allArticles}
+              <ArrowUpRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden
+              />
+            </Link>
+          </Reveal>
+        ) : null}
+      </div>
+
+      {articles.length > 0 ? (
+        <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article, i) => (
+            <Reveal key={article.id} from="up" delay={(i % 3) * 80}>
+              <ArticleCard article={article} locale={locale} ctaLabel={strings.readArticle} />
             </Reveal>
           ))}
-        </ul>
+        </div>
       ) : (
-        <EmptyState className="mt-14" message={copy("testimonials.empty")} />
+        <EmptyState className="mt-12" message={copy("articles.empty")} />
       )}
     </Container>
   );

@@ -8,7 +8,28 @@ import { seedData } from "../defaults";
 import type { CmsStore } from "../store";
 import type { CollectionMap, CollectionName, DocPatch, NewDoc } from "../types";
 
-type Database = { [K in CollectionName]: CollectionMap[K][] };
+type Database = { [K in CollectionName]: CollectionMap[K][] } & {
+  /** Ids of one-time migrations already applied to this file. */
+  migrations?: string[];
+};
+
+/**
+ * One-time upgrades for files written by an earlier version. Each runs once and
+ * is then recorded, so an admin who deletes the row keeps it deleted.
+ */
+const MIGRATIONS: { id: string; apply: (db: Database) => boolean }[] = [
+  {
+    // V2 added the public /articles route.
+    id: "v2-articles-nav",
+    apply: (db) => {
+      if (db.navigation_items.some((item) => item.href === "/articles")) return false;
+      const seeded = seedData().navigation_items.find((item) => item.href === "/articles");
+      if (!seeded) return false;
+      db.navigation_items.push({ ...seeded, order: db.navigation_items.length });
+      return true;
+    },
+  },
+];
 
 const FILE = process.env.CMS_DATA_FILE
   ? path.resolve(process.env.CMS_DATA_FILE)
@@ -137,6 +158,14 @@ export async function createJsonStore(): Promise<CmsStore> {
     // Merge so a collection added in a later version is not missing on disk.
     db = { ...seed, ...parsed } as Database;
     loadedAt = (await stat(FILE)).mtimeMs;
+
+    const applied = new Set(db.migrations ?? []);
+    for (const migration of MIGRATIONS) {
+      if (applied.has(migration.id)) continue;
+      migration.apply(db);
+      applied.add(migration.id);
+    }
+    db.migrations = [...applied];
   } catch {
     // First run (or unreadable file): start from the seed and write it out.
   }

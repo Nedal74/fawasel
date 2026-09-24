@@ -114,12 +114,13 @@ export async function saveDocAction(
 
   const values = parseValues(config, formData);
 
-  // Projects: derive the slug from the name when empty, then de-duplicate it.
-  if (config.name === "projects") {
-    const name = values.name as { en: string; ar: string };
-    const slug = String(values.slug || "").trim() || slugify(name.en || name.ar);
-    if (!slug) return { error: "A project needs a name or a slug." };
-    values.slug = await ensureUniqueSlug("projects", slugify(slug), id);
+  // Anything with a slug (projects, articles): derive it from the title when
+  // empty, then de-duplicate it within its own collection.
+  if (config.fields.some((field) => field.type === "slug")) {
+    const titled = (values[config.titleField] ?? {}) as { en?: string; ar?: string };
+    const slug = String(values.slug || "").trim() || slugify(titled.en || titled.ar || "");
+    if (!slug) return { error: `A ${config.singular.toLowerCase()} needs a title or a slug.` };
+    values.slug = await ensureUniqueSlug(config.name, slugify(slug), id);
     if (values.published && !values.publishedAt) values.publishedAt = new Date().toISOString();
   }
 
@@ -312,8 +313,9 @@ async function deleteMediaObject(url: string): Promise<void> {
   try {
     if (url.startsWith("/uploads/")) {
       const { unlink } = await import("node:fs/promises");
-      const path = await import("node:path");
-      await unlink(path.join(process.cwd(), "public", url.replace(/^\//, "")));
+      const { resolveUploadPath } = await import("@/lib/uploads");
+      const target = resolveUploadPath(url.replace("/uploads/", "").split("/"));
+      if (target) await unlink(target);
       return;
     }
     if (supabaseConfigured()) {

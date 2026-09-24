@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/auth";
 import { getStore, supabaseConfigured } from "@/lib/cms/store";
+import { UPLOAD_DIR } from "@/lib/uploads";
 
 const MAX_BYTES = 8 * 1024 * 1024;
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/svg+xml", "image/gif"];
@@ -55,9 +56,8 @@ export async function POST(request: Request) {
       if (error) throw new Error(error.message);
       url = client.storage.from(bucket).getPublicUrl(key).data.publicUrl;
     } else {
-      const directory = path.join(process.cwd(), "public", "uploads");
-      await mkdir(directory, { recursive: true });
-      await writeFile(path.join(directory, key), buffer);
+      await mkdir(UPLOAD_DIR, { recursive: true });
+      await writeFile(path.join(UPLOAD_DIR, key), buffer);
       url = `/uploads/${key}`;
     }
   } catch (error) {

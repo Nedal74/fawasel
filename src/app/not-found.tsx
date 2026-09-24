@@ -13,7 +13,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/"
-        className="btn-shine relative rounded-full bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.18em] text-[#0a0a0b]"
+        className="btn-shine relative rounded-full btn-accent px-7 py-3.5 text-xs font-medium uppercase tracking-[0.18em]"
       >
         Back home
       </Link>

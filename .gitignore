@@ -41,5 +41,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 data/cms.json
-public/uploads/*
-!public/uploads/.gitkeep
+data/uploads/

@@ -46,7 +46,7 @@ export function LoginForm({ configured, t }: { configured: boolean; t: AdminStri
       <button
         type="submit"
         disabled={pending}
-        className="btn-shine inline-flex w-full items-center justify-center gap-2 rounded bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-5 py-3 text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-[#0a0a0b] disabled:opacity-60"
+        className="btn-shine inline-flex w-full items-center justify-center gap-2 rounded btn-accent px-5 py-3 text-[0.6875rem] font-medium uppercase tracking-[0.14em] disabled:opacity-60"
       >
         {pending ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

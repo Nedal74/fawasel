@@ -20,11 +20,11 @@ export function PageHeader({
         <span className="label">{eyebrow}</span>
         <span className="accent-rule h-px w-16 opacity-70" aria-hidden />
       </div>
-      <h1 className="display animate-hero-rise mt-6 text-[clamp(2.5rem,7vw,5.5rem)]" style={{ animationDelay: "0.2s" }}>
+      <h1 className="display animate-mask-up mt-6 text-[clamp(2.5rem,7vw,5.5rem)]" style={{ animationDelay: "0.15s" }}>
         {title}
       </h1>
       {intro ? (
-        <p className="animate-hero-rise mt-6 max-w-2xl text-sm leading-relaxed text-muted" style={{ animationDelay: "0.35s" }}>
+        <p className="animate-rise mt-6 max-w-2xl text-sm leading-relaxed text-muted" style={{ animationDelay: "0.35s" }}>
           {intro}
         </p>
       ) : null}

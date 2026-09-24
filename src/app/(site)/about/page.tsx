@@ -1,21 +1,9 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/public/PageHeader";
-import {
-  AboutSection,
-  CapabilitiesSection,
-  ExperienceSection,
-  IntelligenceSection,
-} from "@/components/public/Sections";
+import { AboutSection, IntelligenceSection, SkillsSection } from "@/components/public/Sections";
 import { getStrings } from "@/i18n/strings";
-import {
-  getContentMap,
-  getExperience,
-  getMetrics,
-  getSettings,
-  getSkills,
-  getTools,
-} from "@/lib/cms/queries";
+import { getContentMap, getMetrics, getSettings, getSkills } from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,13 +14,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const locale = await getLocale();
-  const [settings, content, skills, tools, metrics, experience] = await Promise.all([
+  const [settings, content, skills, metrics] = await Promise.all([
     getSettings(),
     getContentMap(),
     getSkills(),
-    getTools(),
     getMetrics(),
-    getExperience(),
   ]);
   const copy = makeCopy(content, locale);
   const strings = getStrings(locale);
@@ -45,9 +31,8 @@ export default async function AboutPage() {
         intro={copy("about.lead")}
       />
       <AboutSection copy={copy} strings={strings} image={settings.aboutImage} />
-      <CapabilitiesSection skills={skills} tools={tools} locale={locale} copy={copy} strings={strings} />
+      <SkillsSection skills={skills} locale={locale} copy={copy} />
       <IntelligenceSection metrics={metrics} locale={locale} copy={copy} />
-      <ExperienceSection entries={experience} locale={locale} copy={copy} />
     </>
   );
 }

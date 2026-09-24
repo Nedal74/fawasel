@@ -9,8 +9,9 @@ const base =
 
 const variants: Record<Variant, string> = {
   accent:
-    "text-[#0a0a0b] bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] shadow-[0_0_28px_-10px_var(--accent-to)]",
-  outline: "border border-[var(--color-line-strong)] text-offwhite hover:border-accent",
+    "btn-accent shadow-[0_0_28px_-10px_var(--accent)]",
+  outline:
+    "border border-[var(--color-line-strong)] text-offwhite transition-colors hover:border-accent hover:text-accent",
   ghost: "text-muted hover:text-offwhite",
 };
 

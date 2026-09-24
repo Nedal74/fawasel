@@ -1,3 +1,4 @@
+import { FloatingWhatsApp } from "@/components/public/FloatingWhatsApp";
 import { Footer } from "@/components/public/Footer";
 import { Navbar } from "@/components/public/Navbar";
 import { getStrings } from "@/i18n/strings";
@@ -45,6 +46,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       />
 
       <main id="main">{children}</main>
+
+      <FloatingWhatsApp
+        phone={settings.whatsapp}
+        label={strings.letsTalk}
+        message={`${copy("hero.name")} — ${strings.startProject}`}
+      />
 
       <Footer
         settings={settings}

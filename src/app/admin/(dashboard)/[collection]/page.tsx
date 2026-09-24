@@ -61,7 +61,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
         {config.readOnly ? null : (
           <Link
             href={`/admin/${config.name}/new`}
-            className="inline-flex items-center gap-2 rounded bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-5 py-2.5 text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-[#0a0a0b]"
+            className="inline-flex items-center gap-2 rounded btn-accent px-5 py-2.5 text-[0.6875rem] font-medium uppercase tracking-[0.12em]"
           >
             <Plus className="h-3.5 w-3.5" aria-hidden />
             {t.newRecord} {singular.toLowerCase()}

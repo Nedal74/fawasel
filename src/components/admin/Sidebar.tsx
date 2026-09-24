@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Wrench,
   Briefcase,
+  Newspaper,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,6 +34,7 @@ function buildGroups(t: AdminStrings) {
       title: t.groupContent,
       items: [
         { href: "/admin/projects", label: t.navProjects, icon: Briefcase },
+        { href: "/admin/articles", label: t.navArticles, icon: Newspaper },
         { href: "/admin/clients", label: t.navClients, icon: Building2 },
         { href: "/admin/services", label: t.navServices, icon: Blocks },
         { href: "/admin/skills", label: t.navSkills, icon: Sparkles },

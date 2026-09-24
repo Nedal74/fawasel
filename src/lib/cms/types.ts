@@ -66,6 +66,9 @@ export interface Service extends BaseDoc {
   longDescription: Localized;
   icon: string;
   category: Localized;
+  /** Per-service CTA shown on the slider card. */
+  ctaLabel: Localized;
+  ctaUrl: string;
   featured: boolean;
   published: boolean;
   order: number;
@@ -155,10 +158,28 @@ export interface SiteContentBlock extends BaseDoc {
   order: number;
 }
 
+export interface Article extends BaseDoc {
+  title: Localized;
+  slug: string;
+  summary: Localized;
+  /** Long-form body. Plain text with blank lines between paragraphs. */
+  content: Localized;
+  coverImage: string;
+  category: Localized;
+  author: string;
+  date: string;
+  featured: boolean;
+  published: boolean;
+  order: number;
+  seoTitle: Localized;
+  seoDescription: Localized;
+}
+
 export interface Inquiry extends BaseDoc {
   name: string;
   company: string;
   email: string;
+  /** Required on the public form; email is optional. */
   phone: string;
   service: string;
   budget: string;
@@ -193,6 +214,7 @@ export interface AdminUser extends BaseDoc {
 
 export type CollectionMap = {
   projects: Project;
+  articles: Article;
   clients: Client;
   services: Service;
   skills: Skill;
@@ -213,6 +235,7 @@ export type CollectionName = keyof CollectionMap;
 
 export const COLLECTION_NAMES = [
   "projects",
+  "articles",
   "clients",
   "services",
   "skills",

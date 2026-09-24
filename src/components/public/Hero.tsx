@@ -26,6 +26,9 @@ export type HeroCopy = {
  * All pointer-driven motion (grid parallax + the spotlight that reveals the
  * secondary portrait) runs in ONE requestAnimationFrame loop and is skipped
  * entirely on touch devices and under `prefers-reduced-motion`.
+ *
+ * Interface is black/white/lime; the photograph keeps its own warm lighting —
+ * the contrast between the two is intentional.
  */
 export function Hero({
   copy,
@@ -131,45 +134,47 @@ export function Hero({
     >
       {/* Layer 0 — parallax grid */}
       <div ref={gridRef} className="pointer-events-none absolute -inset-8 will-change-transform" aria-hidden>
-        <svg className="h-full w-full opacity-[0.28]" aria-hidden>
+        <svg className="h-full w-full opacity-[0.22]" aria-hidden>
           <defs>
             <pattern id="hero-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-              <path d="M48 0H0V48" fill="none" stroke="#64748b" strokeWidth="0.6" />
+              <path d="M48 0H0V48" fill="none" stroke="#ffffff" strokeWidth="0.6" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#hero-grid)" />
         </svg>
       </div>
 
-      {/* Atmospheric red/orange glow behind the portrait */}
+      {/* Restrained lime halo behind the portrait — interface, not photography */}
       <div
         aria-hidden
-        className="pointer-events-none absolute end-0 top-1/2 h-[95vmin] w-[95vmin] -translate-y-1/2 translate-x-1/4 rounded-full opacity-[calc(0.55*var(--visual-intensity))] blur-[90px]"
-        style={{
-          background:
-            "radial-gradient(circle, var(--accent-to) 0%, var(--accent-from) 42%, transparent 68%)",
-        }}
+        className="pointer-events-none absolute end-0 top-1/2 h-[80vmin] w-[80vmin] -translate-y-1/2 translate-x-1/3 rounded-full opacity-[calc(0.16*var(--visual-intensity))] blur-[110px]"
+        style={{ background: "radial-gradient(circle, var(--accent) 0%, transparent 68%)" }}
       />
 
       <div className="relative z-10 mx-auto grid w-full max-w-[1400px] grid-cols-1 items-center gap-10 px-5 pb-24 pt-32 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:px-12 lg:pb-16">
         {/* Copy */}
         <div className="lg:col-span-7">
-          <div className="animate-hero-rise flex items-center gap-3" style={{ animationDelay: "0.15s" }}>
+          <div className="animate-drop flex items-center gap-3">
             <span className="animate-tick block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
             <span className="label">{copy.eyebrow}</span>
           </div>
 
-          <h1
-            className="animate-hero-rise display mt-6 text-[clamp(2.75rem,9vw,7rem)]"
-            style={{ animationDelay: "0.3s" }}
-          >
-            {copy.name}
-            <span className="mt-2 block text-[clamp(1rem,2.4vw,1.85rem)] tracking-[0.22em] text-muted">
+          <h1 className="mt-6">
+            <span
+              className="animate-mask-up display block text-[clamp(2.75rem,9vw,7.5rem)]"
+              style={{ animationDelay: "0.15s" }}
+            >
+              {copy.name}
+            </span>
+            <span
+              className="animate-slide-start mt-3 block text-[clamp(1rem,2.4vw,1.85rem)] tracking-[0.24em] text-accent"
+              style={{ animationDelay: "0.35s" }}
+            >
               {copy.title}
             </span>
           </h1>
 
-          <div className="animate-hero-rise mt-7 max-w-xl" style={{ animationDelay: "0.5s" }}>
+          <div className="animate-rise mt-7 max-w-xl" style={{ animationDelay: "0.55s" }}>
             <p className="text-sm leading-relaxed text-muted">{copy.descriptor}</p>
             <p className="mt-5 border-s-2 border-accent ps-4 text-base leading-relaxed text-offwhite/90">
               {copy.philosophy}
@@ -177,18 +182,18 @@ export function Hero({
           </div>
 
           <div
-            className="animate-hero-rise mt-9 flex flex-wrap items-center gap-3"
-            style={{ animationDelay: "0.7s" }}
+            className="animate-rise mt-9 flex flex-wrap items-center gap-3"
+            style={{ animationDelay: "0.72s" }}
           >
             <Link
               href="/contact"
-              className="btn-shine rounded-full bg-[linear-gradient(96deg,var(--accent-from),var(--accent-to))] px-7 py-3.5 text-xs font-medium uppercase tracking-[0.18em] text-[#0a0a0b] shadow-[0_0_34px_-12px_var(--accent-to)] transition-transform duration-300 hover:scale-[1.02]"
+              className="btn-shine btn-accent rounded-full px-8 py-3.5 text-xs font-medium uppercase tracking-[0.18em] shadow-[0_0_40px_-16px_var(--accent)] transition-transform duration-300 hover:scale-[1.02]"
             >
               {copy.cta}
             </Link>
             <Link
               href="/projects"
-              className="rounded-full border border-[var(--color-line-strong)] px-7 py-3.5 text-xs uppercase tracking-[0.18em] text-offwhite transition-colors hover:border-accent"
+              className="rounded-full border border-[var(--color-line-strong)] px-8 py-3.5 text-xs uppercase tracking-[0.18em] text-offwhite transition-colors duration-300 hover:border-accent hover:text-accent"
             >
               {copy.ctaSecondary}
             </Link>
@@ -196,18 +201,14 @@ export function Hero({
 
           {metrics.length > 0 ? (
             <dl
-              className="animate-hero-rise mt-12 grid max-w-2xl grid-cols-2 gap-px overflow-hidden border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-4"
-              style={{ animationDelay: "0.85s" }}
+              className="animate-rise mt-12 grid max-w-2xl grid-cols-2 gap-px overflow-hidden border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-4"
+              style={{ animationDelay: "0.88s" }}
             >
               {metrics.map((metric) => (
-                <div key={metric.id} className="bg-void/80 px-4 py-4">
+                <div key={metric.id} className="bg-void px-4 py-4">
                   <dt className="label text-[0.5625rem]">{metric.label}</dt>
-                  <dd className="mt-1.5 text-xl font-semibold">
-                    <CountUp
-                      value={metric.value}
-                      prefix={metric.prefix}
-                      suffix={metric.suffix}
-                    />
+                  <dd className="mt-1.5 text-xl font-semibold text-accent">
+                    <CountUp value={metric.value} prefix={metric.prefix} suffix={metric.suffix} />
                   </dd>
                 </div>
               ))}
@@ -257,11 +258,7 @@ export function Hero({
               <TechLabel>SIGNAL</TechLabel>
               <div className="mt-1.5 flex items-end gap-[3px]" aria-hidden>
                 {[9, 14, 7, 18, 11, 22, 16].map((height, i) => (
-                  <span
-                    key={i}
-                    className="w-1 bg-[linear-gradient(to_top,var(--accent-from),var(--accent-to))]"
-                    style={{ height }}
-                  />
+                  <span key={i} className="w-1 bg-accent" style={{ height }} />
                 ))}
               </div>
             </div>
@@ -278,7 +275,7 @@ export function Hero({
       <div className="absolute inset-x-0 bottom-6 flex justify-center">
         <span className="label flex items-center gap-2 text-[0.625rem]">
           {copy.scroll}
-          <ArrowDown className="h-3 w-3 animate-tick" aria-hidden />
+          <ArrowDown className="h-3 w-3 animate-tick text-accent" aria-hidden />
         </span>
       </div>
     </section>

@@ -14,7 +14,12 @@ const EMAIL = process.env.ADMIN_EMAIL ?? "admin@nedal.local";
 const PASSWORD = process.env.ADMIN_PASSWORD ?? "nedal-dev-admin";
 
 process.on("uncaughtException", (error) => {
-  check("run completed", false, String(error).split("\n")[0]);
+  const detail = String(error?.stack ?? error)
+    .split("\n")
+    .filter((line) => line.includes("smoke.mjs") || line.includes("Error"))
+    .slice(0, 3)
+    .join(" | ");
+  check("run completed", false, detail);
   report();
   process.exit(1);
 });
@@ -65,8 +70,9 @@ async function visit(path, expected) {
 await visit("/", "NEDAL ELABID");
 await visit("/about", "THE PERSON BEHIND THE STRATEGY");
 await visit("/services", "Marketing Strategy");
-await visit("/projects", "CASE STUDIES");
-await visit("/clients", "TRUSTED BY");
+await visit("/projects", "MY WORK");
+await visit("/articles", "MY ARTICLES");
+await visit("/clients", "CLIENTS WHO TRUSTED ME");
 await visit("/contact", "START A PROJECT");
 
 // Arabic / RTL
@@ -79,6 +85,51 @@ const lang = await page.evaluate(() => document.documentElement.getAttribute("la
 check("Arabic switches to RTL", dir === "rtl" && lang === "ar", `dir=${dir} lang=${lang}`);
 check("Arabic hero copy renders", (await page.content()).includes("مدير تسويق"));
 await context.clearCookies();
+
+// --- homepage interactions --------------------------------------------------
+await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+
+// Services slider: the active (lime) card changes when advancing.
+const activeService = () =>
+  page.evaluate(() => {
+    const card = document.querySelector("#services article");
+    return card ? card.textContent?.replace(/\s+/g, " ").trim() ?? "" : "";
+  });
+await page.locator("#services").scrollIntoViewIfNeeded();
+const serviceBefore = await activeService();
+await page.getByRole("button", { name: "Next service" }).click();
+await page.waitForTimeout(900);
+check("services slider advances", (await activeService()) !== serviceBefore);
+
+// Metrics: the large number changes when advancing.
+await page.locator("#intelligence").scrollIntoViewIfNeeded();
+const liveMetric = () => page.locator('#intelligence [aria-live="polite"]').textContent();
+const metricBefore = await liveMetric();
+await page.getByRole("button", { name: "Next metric" }).click();
+await page.waitForTimeout(900);
+check("metrics carousel advances", (await liveMetric()) !== metricBefore, `${metricBefore}`);
+
+// Homepage order must match the V2 spec.
+const order = await page.evaluate(() =>
+  [...document.querySelectorAll("section[id]")].map((section) => section.id),
+);
+check(
+  "homepage section order",
+  order.join(",") ===
+    "about,services,work,skills,intelligence,clients,testimonials,articles,contact",
+  order.join(","),
+);
+
+check(
+  "no experience or tools section on the public site",
+  !order.includes("experience") && !order.includes("tools"),
+);
+
+// Floating WhatsApp button is present and points at the CMS number.
+check(
+  "floating WhatsApp button",
+  (await page.locator('a[href*="wa.me/966573728884"]').count()) > 0,
+);
 
 // --- admin auth -------------------------------------------------------------
 await page.goto(`${BASE}/admin`, { waitUntil: "networkidle" });
@@ -138,8 +189,10 @@ check("featured project appears on the homepage", (await page.content()).include
 // --- unpublish round-trip ---------------------------------------------------
 await page.goto(`${BASE}/admin/projects`, { waitUntil: "networkidle" });
 const row = page.locator("tr", { hasText: "Smoke Test Campaign" }).first();
-await row.locator('button[aria-label="Unpublish"]').click();
-await page.waitForLoadState("networkidle");
+await row.locator('button[aria-label="Unpublish"]').click({ noWaitAfter: true });
+await page.waitForFunction(() => document.body.innerText.includes("Draft"), undefined, {
+  timeout: 15000,
+}).catch(() => undefined);
 const unpublished = await page.goto(`${BASE}/projects/${slug}`, { waitUntil: "networkidle" });
 check("unpublished project 404s on the public site", unpublished?.status() === 404);
 
@@ -159,6 +212,46 @@ await page.waitForFunction(
 await page.reload({ waitUntil: "networkidle" });
 check("project deleted", !(await page.content()).includes("Smoke Test Campaign"));
 
+// --- articles ---------------------------------------------------------------
+const articleSlug = `smoke-article-${Date.now()}`;
+await page.goto(`${BASE}/admin/articles/new`, { waitUntil: "networkidle" });
+await page.fill("#title-en", "Smoke Test Article");
+await page.fill("#slug", articleSlug);
+await page.fill("#summary-en", "An article created by the automated smoke test.");
+await page.fill("#content-en", "## Heading\n\nFirst paragraph.\n\nSecond paragraph.");
+await page.fill("#category-en", "Strategy");
+await page.fill("#date", "2026-03-18");
+await page.check('input[name="featured"]');
+await Promise.all([
+  page.waitForURL(/\/admin\/articles\/(?!new)[^/]+/, { timeout: 15000 }),
+  page.getByRole("button", { name: "Save", exact: true }).click(),
+]);
+await visit(`/articles/${articleSlug}`, "Smoke Test Article");
+check("article body renders its heading", (await page.locator("article h2").count()) > 0);
+check(
+  "article body splits into paragraphs",
+  (await page.locator("article p").filter({ hasText: "paragraph" }).count()) >= 2,
+);
+await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+check("article appears on the homepage", (await page.content()).includes("Smoke Test Article"));
+
+await page.goto(`${BASE}/admin/articles`, { waitUntil: "networkidle" });
+await page
+  .locator("tr", { hasText: "Smoke Test Article" })
+  .first()
+  .locator('button[aria-label="Delete"]')
+  .click();
+await page.waitForTimeout(1200);
+await page.reload({ waitUntil: "networkidle" });
+check("article deleted", !(await page.content()).includes("Smoke Test Article"));
+
+// --- dashboard palette ------------------------------------------------------
+await page.goto(`${BASE}/admin`, { waitUntil: "networkidle" });
+const accent = await page.evaluate(() =>
+  getComputedStyle(document.documentElement).getPropertyValue("--accent").trim().toLowerCase(),
+);
+check("dashboard uses the lime accent", accent === "#bef532", accent);
+
 // --- media library ----------------------------------------------------------
 await page.goto(`${BASE}/admin/media`, { waitUntil: "networkidle" });
 const before = await page.locator("main li").count();
@@ -177,16 +270,27 @@ await page.waitForFunction(
   { timeout: 20000 },
 ).catch(() => undefined);
 check("media upload adds an asset", (await page.locator("main li").count()) > before);
+const uploadedSrc = await page.locator("main li img").first().getAttribute("src");
+const uploadedResponse = uploadedSrc ? await page.request.get(`${BASE}${uploadedSrc}`) : null;
+check(
+  "uploaded media is served",
+  uploadedResponse?.status() === 200,
+  `${uploadedSrc} -> ${uploadedResponse?.status()}`,
+);
 page.once("dialog", (dialog) => dialog.accept());
-await page.locator('button[aria-label^="Delete smoke-pixel"]').first().click();
+// The row disappears as the action completes, so don't wait on the element.
+await page
+  .locator('button[aria-label^="Delete smoke-pixel"]')
+  .first()
+  .click({ noWaitAfter: true });
 await page.waitForLoadState("networkidle");
 
 // --- contact form -----------------------------------------------------------
 await page.goto(`${BASE}/contact`, { waitUntil: "networkidle" });
 await page.fill("#contact-name", "Smoke Tester");
-await page.fill("#contact-email", "smoke@example.com");
+await page.fill("#contact-phone", "+966500000000");
 await page.fill("#contact-brief", "Checking the inquiry pipeline.");
-await page.getByRole("button", { name: "Send Inquiry" }).click();
+await page.getByRole("button", { name: "Start project" }).click();
 await page.waitForSelector('[role="status"]', { timeout: 15000 });
 check("contact form shows the success state", (await page.content()).includes("Received."));
 

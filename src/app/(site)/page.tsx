@@ -2,11 +2,11 @@ import { ContactSection } from "@/components/public/ContactSection";
 import { Hero } from "@/components/public/Hero";
 import {
   AboutSection,
-  CapabilitiesSection,
+  ArticlesSection,
   ClientsSection,
-  ExperienceSection,
   IntelligenceSection,
   ServicesSection,
+  SkillsSection,
   TestimonialsSection,
   WorkSection,
 } from "@/components/public/Sections";
@@ -14,7 +14,7 @@ import { getStrings } from "@/i18n/strings";
 import {
   getClients,
   getContentMap,
-  getExperience,
+  getFeaturedArticles,
   getFeaturedProjects,
   getMetrics,
   getServices,
@@ -22,7 +22,6 @@ import {
   getSkills,
   getSocialLinks,
   getTestimonials,
-  getTools,
 } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
 
@@ -34,11 +33,10 @@ export default async function HomePage() {
     metrics,
     services,
     skills,
-    tools,
     projects,
     clients,
-    experience,
     testimonials,
+    articles,
     socials,
   ] = await Promise.all([
     getSettings(),
@@ -46,11 +44,10 @@ export default async function HomePage() {
     getMetrics(),
     getServices(),
     getSkills(),
-    getTools(),
     getFeaturedProjects(),
     getClients(),
-    getExperience(),
     getTestimonials(),
+    getFeaturedArticles(),
     getSocialLinks(),
   ]);
 
@@ -61,6 +58,7 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* 01 — HERO */}
       <Hero
         image={settings.heroImage}
         revealImage={settings.heroRevealImage}
@@ -87,36 +85,52 @@ export default async function HomePage() {
           }))}
       />
 
+      {/* 02 — ABOUT */}
       {enabled("about") ? (
         <AboutSection copy={copy} strings={strings} image={settings.aboutImage} />
       ) : null}
+
+      {/* 03 — SERVICES */}
       {enabled("services") ? (
-        <ServicesSection services={services} locale={locale} copy={copy} limit={9} />
+        <ServicesSection services={services} locale={locale} copy={copy} strings={strings} />
       ) : null}
-      {enabled("skills") ? (
-        <CapabilitiesSection
-          skills={skills}
-          tools={tools}
+
+      {/* 04 — MY WORK */}
+      {enabled("work") ? (
+        <WorkSection
+          projects={projects}
+          clients={clients}
+          services={services}
           locale={locale}
           copy={copy}
           strings={strings}
         />
       ) : null}
+
+      {/* 05 — SKILLS */}
+      {enabled("skills") ? <SkillsSection skills={skills} locale={locale} copy={copy} /> : null}
+
+      {/* 06 — MARKETING NUMBERS */}
       {enabled("intelligence") ? (
         <IntelligenceSection metrics={metrics} locale={locale} copy={copy} />
       ) : null}
-      {enabled("work") ? (
-        <WorkSection projects={projects} locale={locale} copy={copy} strings={strings} />
-      ) : null}
+
+      {/* 07 — CLIENTS */}
       {enabled("clients") ? (
         <ClientsSection clients={clients} locale={locale} copy={copy} />
       ) : null}
-      {enabled("experience") ? (
-        <ExperienceSection entries={experience} locale={locale} copy={copy} />
-      ) : null}
+
+      {/* 08 — TESTIMONIALS */}
       {enabled("testimonials") ? (
         <TestimonialsSection testimonials={testimonials} locale={locale} copy={copy} />
       ) : null}
+
+      {/* 09 — ARTICLES */}
+      {enabled("articles") ? (
+        <ArticlesSection articles={articles} locale={locale} copy={copy} strings={strings} />
+      ) : null}
+
+      {/* 10 — START A PROJECT */}
       {enabled("contact") ? (
         <ContactSection
           settings={settings}

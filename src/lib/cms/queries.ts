@@ -2,9 +2,10 @@ import "server-only";
 
 import { cache } from "react";
 
-import { seedData } from "./defaults";
+import { LEGACY_COPY, seedData } from "./defaults";
 import { getStore } from "./store";
 import type {
+  Article,
   Client,
   CollectionMap,
   CollectionName,
@@ -43,15 +44,46 @@ function publishedOnly<T extends { published?: boolean }>(rows: T[]): T[] {
   return rows.filter((row) => row.published !== false);
 }
 
+/** Accents shipped before the V2 black/white/lime system. */
+const LEGACY_ACCENTS = new Set(["#c81e18", "#ff7a18"]);
+
 export const getSettings = cache(async (): Promise<SiteSettings> => {
-  const rows = await listAll("site_settings");
-  return rows[0] ?? (seedData().site_settings[0] as SiteSettings);
+  const seed = seedData().site_settings[0] as SiteSettings;
+  const stored = (await listAll("site_settings"))[0];
+  if (!stored) return seed;
+
+  // Merge so fields added after a site was seeded (new section toggles, new
+  // image slots) are present, and retire the pre-V2 red/orange accent.
+  const accentFrom = LEGACY_ACCENTS.has(stored.accentFrom?.toLowerCase())
+    ? seed.accentFrom
+    : stored.accentFrom || seed.accentFrom;
+  const accentTo = LEGACY_ACCENTS.has(stored.accentTo?.toLowerCase())
+    ? seed.accentTo
+    : stored.accentTo || seed.accentTo;
+
+  return {
+    ...seed,
+    ...stored,
+    accentFrom,
+    accentTo,
+    sections: { ...seed.sections, ...(stored.sections ?? {}) },
+  };
 });
 
 export const getContentMap = cache(async (): Promise<Record<string, SiteContentBlock>> => {
-  const rows = await listAll("site_content");
   const map: Record<string, SiteContentBlock> = {};
-  for (const row of rows) map[row.key] = row;
+  // Seed first so copy keys added in a later version still render; stored
+  // blocks then override them.
+  const seeded = seedData().site_content;
+  for (const block of seeded) map[block.key] = block;
+
+  for (const row of await listAll("site_content")) {
+    const legacy = LEGACY_COPY[row.key];
+    const untouched =
+      legacy && row.value.en === legacy.en && row.value.ar === legacy.ar && map[row.key];
+    // An untouched V1 default keeps following the seed through the rename.
+    if (!untouched) map[row.key] = row;
+  }
   return map;
 });
 
@@ -69,6 +101,27 @@ export const getFeaturedProjects = cache(async (): Promise<Project[]> => {
 export const getProjectBySlug = cache(async (slug: string): Promise<Project | null> => {
   const rows = await listAll("projects");
   return rows.find((p) => p.slug === slug && p.published) ?? null;
+});
+
+export const getArticles = cache(async (): Promise<Article[]> => {
+  const rows = publishedOnly(await listAll("articles"));
+  return [...rows].sort(
+    (a, b) =>
+      (a.order ?? 0) - (b.order ?? 0) ||
+      (b.date ?? "").localeCompare(a.date ?? "") ||
+      b.createdAt.localeCompare(a.createdAt),
+  );
+});
+
+export const getFeaturedArticles = cache(async (): Promise<Article[]> => {
+  const articles = await getArticles();
+  const featured = articles.filter((article) => article.featured);
+  return (featured.length > 0 ? featured : articles).slice(0, 3);
+});
+
+export const getArticleBySlug = cache(async (slug: string): Promise<Article | null> => {
+  const rows = await listAll("articles");
+  return rows.find((article) => article.slug === slug && article.published) ?? null;
 });
 
 export const getServices = cache(async (): Promise<Service[]> =>

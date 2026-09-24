@@ -31,7 +31,7 @@ export default async function ServicesPage() {
         title={copy("services.heading")}
         intro={copy("services.intro")}
       />
-      <ServicesSection services={services} locale={locale} copy={copy} />
+      <ServicesSection services={services} locale={locale} copy={copy} strings={strings} />
       <ContactSection
         settings={settings}
         services={services}

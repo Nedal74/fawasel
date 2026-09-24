@@ -1,0 +1,18 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+/** Tracks `prefers-reduced-motion`, including changes made while open. */
+export function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const query = matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return reduced;
+}

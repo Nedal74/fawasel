@@ -21,6 +21,7 @@ clients, services, skills, metrics, navigation, social links and site copy.
 | --- | --- |
 | Framework | Next.js 15 (App Router, React 19, TypeScript) |
 | Styling | Tailwind CSS v4 + a token-based design system in `src/app/globals.css` |
+| Palette | Black `#000000` · White `#FFFFFF` · Lime `#BEF532` (the signature accent) |
 | Icons | lucide-react |
 | Type | JetBrains Mono (Latin) · IBM Plex Sans Arabic (Arabic) |
 | Data | Supabase (Postgres + Storage) when configured, file-backed JSON otherwise |
@@ -158,11 +159,23 @@ adding a content field is a one-line change.
 
 ---
 
+## Homepage
+
+```
+01 Hero      02 About      03 Services (vertical slider)   04 My Work
+05 Skills    06 Marketing numbers (sequential carousel)    07 Clients (marquee)
+08 Testimonials (image slider)   09 Articles   10 Start a project   11 Footer
+```
+
+Every section can be switched off in **Settings → Homepage sections**. Career
+timeline and Tools are not on the public site; both collections remain in the
+dashboard for internal use.
+
 ## Content model
 
-`projects · clients · services · skills · tools · experience · testimonials ·
-metrics · social_links · navigation_items · media_assets · site_content ·
-site_settings · inquiries`
+`projects · articles · clients · services · skills · tools · experience ·
+testimonials · metrics · social_links · navigation_items · media_assets ·
+site_content · site_settings · inquiries`
 
 Every text field that appears on the site exists in **both English and Arabic**;
 an empty language falls back to the other one. Projects relate to a client and to
@@ -177,6 +190,20 @@ hero/section copy.
 Deliberately **empty**: projects, experience, testimonials and tools. Nothing was
 invented — the site renders elegant empty states until real records are entered.
 The same applies to imagery: `public/images/portrait-*.svg` are placeholders.
+
+### Articles
+
+`/articles` and `/articles/<slug>` are CMS-powered. The body is plain text: a
+blank line starts a new paragraph, and a line beginning with `## ` becomes a
+heading. Featured articles surface on the homepage.
+
+### Media storage
+
+With Supabase configured, uploads go to its Storage bucket. Otherwise they are
+written to `data/uploads/` (override with `UPLOAD_DIR`) and served by the
+`/uploads/[...path]` route — *not* from `public/`, because Next only serves
+`public/` files that existed when the build ran, so anything uploaded later
+would 404 in production.
 
 ### Adding the real portrait
 
@@ -212,9 +239,11 @@ language, since both are edited side by side. Arabic UI strings live in
 
 ## Accessibility & performance
 
-Semantic landmarks and headings, skip link, keyboard-navigable menus and
-controls, visible focus rings, labelled form fields with accessible error
-messages, alt text on meaningful images, `aria-hidden` on decoration.
+Semantic landmarks and headings, skip link, keyboard-navigable menus, sliders
+(arrow keys) and controls, visible focus rings, labelled form fields with
+accessible error messages, live regions on the sliders, alt text on meaningful
+images, `aria-hidden` on decoration. Only name and phone are required on the
+inquiry form.
 
 `prefers-reduced-motion` disables the hero's pointer effects, the counters and
 every reveal. All pointer-driven motion runs in a single `requestAnimationFrame`
@@ -232,11 +261,14 @@ npm run smoke
 ```
 
 `scripts/smoke.mjs` drives a real browser through: every public route in both
-languages, horizontal-overflow checks at 1280px and 390px, the admin redirect for
-anonymous visitors, sign-in, creating and publishing a project, seeing it on the
-listing, the homepage and its case-study page, unpublishing it (public 404),
-deleting it, uploading and deleting a media asset, the contact form's success
-state, and a console-error check. It exits non-zero on the first failure.
+languages, horizontal-overflow checks at 1280px and 390px, the homepage section
+order, the services slider and metrics carousel advancing, the floating WhatsApp
+button, the admin redirect for anonymous visitors, sign-in, the dashboard's
+Arabic toggle and lime accent, creating and publishing a project and an article
+(including paragraph/heading parsing) and seeing both on the public site,
+unpublishing (public 404) and deleting them, uploading a media asset and
+fetching its URL, the contact form's success state, and a console-error check.
+It exits non-zero on the first failure.
 
 Set `BASE_URL` to test another origin, and `ADMIN_EMAIL` / `ADMIN_PASSWORD` to use
 non-default credentials.

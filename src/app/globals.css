@@ -1,27 +1,32 @@
 @import "tailwindcss";
 
 /*
- * Executive cyberpunk design system.
- * Near-black / graphite / off-white foundation; red→orange only as signal.
- * Accent values are injected on <html> by the CMS Appearance settings.
+ * NEDAL ELABID — V2 design system.
+ * Black / White / Lime. Lime (#BEF532) is the signature: active states, CTAs,
+ * numbers and indicators only — never large fills of colour for their own sake.
  */
 :root {
-  --color-void: #08090b;
-  --color-ink: #0d0f13;
-  --color-graphite: #14171d;
-  --color-graphite-soft: #1c2027;
-  --color-offwhite: #edeae5;
-  --color-muted: #8c9199;
-  --color-dim: #5d626b;
-  --color-line: rgba(237, 234, 229, 0.1);
-  --color-line-strong: rgba(237, 234, 229, 0.22);
+  --color-void: #000000;
+  --color-ink: #0a0a0a;
+  --color-graphite: #111111;
+  --color-graphite-soft: #181818;
+  --color-graphite-hard: #222222;
+  --color-offwhite: #ffffff;
+  --color-paper: #f5f5f5;
+  --color-muted: #9a9a9a;
+  --color-dim: #5f5f5f;
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-line-strong: rgba(255, 255, 255, 0.26);
 
   /* Overridden inline from site settings (Appearance). */
-  --accent-from: #c81e18;
-  --accent-to: #ff7a18;
-  --accent: var(--accent-to);
+  --accent-from: #bef532;
+  --accent-to: #bef532;
+  --accent: #bef532;
+  /* Text that sits on top of the accent. */
+  --accent-ink: #000000;
   --visual-intensity: 0.7;
 
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --font-display: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -30,13 +35,16 @@
   --color-ink: var(--color-ink);
   --color-graphite: var(--color-graphite);
   --color-graphite-soft: var(--color-graphite-soft);
+  --color-graphite-hard: var(--color-graphite-hard);
   --color-offwhite: var(--color-offwhite);
+  --color-paper: var(--color-paper);
   --color-muted: var(--color-muted);
   --color-dim: var(--color-dim);
   --color-line: var(--color-line);
   --color-accent: var(--accent);
   --color-accent-from: var(--accent-from);
   --color-accent-to: var(--accent-to);
+  --color-accent-ink: var(--accent-ink);
 
   --font-sans: var(--font-display);
   --font-mono: var(--font-display);
@@ -46,6 +54,12 @@ html {
   scroll-behavior: smooth;
   background: var(--color-void);
   -webkit-text-size-adjust: 100%;
+  /*
+   * Directional reveals translate elements sideways before they animate in.
+   * `clip` (not `hidden`) contains that without creating a scroll container,
+   * so sticky positioning keeps working.
+   */
+  overflow-x: clip;
 }
 
 [lang="ar"] {
@@ -62,18 +76,17 @@ body {
   background: var(--color-void);
   color: var(--color-offwhite);
   font-family: var(--font-display);
-  font-feature-settings: "ss01", "cv01";
   overflow-x: clip;
   min-height: 100dvh;
 }
 
 ::selection {
-  background: var(--accent-to);
-  color: #08090b;
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-to);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -81,21 +94,17 @@ body {
 /* --- Surfaces -------------------------------------------------------- */
 
 .glass {
-  background: color-mix(in srgb, var(--color-graphite) 62%, transparent);
+  background: color-mix(in srgb, var(--color-graphite) 72%, transparent);
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   border: 1px solid var(--color-line);
 }
 
-.hairline {
-  border-color: var(--color-line);
-}
-
 /* Fine background grid used behind sections. */
 .grid-field {
   background-image:
-    linear-gradient(to right, rgba(237, 234, 229, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(237, 234, 229, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
@@ -105,20 +114,17 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: calc(0.06 * var(--visual-intensity));
+  opacity: calc(0.05 * var(--visual-intensity));
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   mix-blend-mode: overlay;
 }
 
 .accent-text {
-  background: linear-gradient(96deg, var(--accent-from), var(--accent-to));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent);
 }
 
 .accent-rule {
-  background: linear-gradient(90deg, var(--accent-from), var(--accent-to), transparent);
+  background: var(--accent);
 }
 
 /* Micro-typography: technical labels, coordinates, data ticks. */
@@ -135,8 +141,8 @@ body {
 
 .display {
   font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
   text-transform: uppercase;
 }
 
@@ -153,29 +159,97 @@ body {
   letter-spacing: normal;
 }
 
-/* --- Motion ---------------------------------------------------------- */
+/* --- Motion system ---------------------------------------------------- */
+/*
+ * One reveal primitive, several directions. Components pick a direction per
+ * section so the page does not read as one repeated fade.
+ */
 
-@keyframes hero-rise {
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 0.75s var(--ease-premium),
+    transform 0.75s var(--ease-premium),
+    filter 0.75s var(--ease-premium);
+  will-change: transform, opacity;
+}
+
+.reveal[data-from="up"] {
+  transform: translateY(28px);
+}
+.reveal[data-from="down"] {
+  transform: translateY(-24px);
+}
+.reveal[data-from="left"] {
+  transform: translateX(-42px);
+}
+.reveal[data-from="right"] {
+  transform: translateX(42px);
+}
+.reveal[data-from="blur"] {
+  filter: blur(10px);
+  transform: scale(1.02);
+}
+.reveal[data-from="mask"] {
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(12px);
+  transition:
+    opacity 0.7s var(--ease-premium),
+    transform 0.9s var(--ease-premium),
+    clip-path 0.9s var(--ease-premium);
+}
+
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  clip-path: inset(0 0 0 0);
+}
+
+/* Entrance animations that run on load (hero, page headers). */
+@keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(26px);
-    filter: blur(8px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
+    transform: none;
   }
 }
 
-@keyframes nav-drop {
+@keyframes slide-in-start {
   from {
     opacity: 0;
-    transform: translateY(-18px);
+    transform: translateX(-44px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mask-up {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: none;
   }
 }
 
@@ -191,46 +265,73 @@ body {
 @keyframes pulse-tick {
   0%,
   100% {
-    opacity: 0.25;
+    opacity: 0.3;
   }
   50% {
     opacity: 1;
   }
 }
 
-.animate-hero-rise {
-  opacity: 0;
-  animation: hero-rise 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
-.animate-nav-drop {
+@keyframes ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.animate-rise {
   opacity: 0;
-  animation: nav-drop 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+  animation: rise-in 0.85s var(--ease-premium) forwards;
+}
+
+.animate-slide-start {
+  opacity: 0;
+  animation: slide-in-start 0.85s var(--ease-premium) forwards;
+}
+
+.animate-drop {
+  opacity: 0;
+  animation: drop-in 0.75s var(--ease-premium) 0.1s forwards;
+}
+
+.animate-mask-up {
+  opacity: 0;
+  animation: mask-up 0.95s var(--ease-premium) forwards;
 }
 
 .animate-ken-burns {
-  animation: ken-burns 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: ken-burns 2.4s var(--ease-premium) forwards;
 }
 
 .animate-tick {
   animation: pulse-tick 3.2s ease-in-out infinite;
 }
 
-/* Reveal-on-scroll primitive (see components/ui/Reveal.tsx). */
-.reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+/* Marquee track: duplicated content, translated by exactly half its width. */
+.marquee-track {
+  animation: marquee var(--marquee-duration, 38s) linear infinite;
 }
 
-.reveal[data-visible="true"] {
-  opacity: 1;
-  transform: none;
+.marquee-host:hover .marquee-track,
+.marquee-host:focus-within .marquee-track {
+  animation-play-state: paused;
 }
 
-/* Buttons: a single controlled shine sweep, no looping glitter. */
+/* Buttons: one controlled sweep, no looping glitter. */
 .btn-shine {
   position: relative;
   overflow: hidden;
@@ -245,16 +346,26 @@ body {
   background: linear-gradient(
     100deg,
     transparent 20%,
-    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.22) 50%,
     transparent 80%
   );
-  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.75s var(--ease-premium);
   z-index: -1;
 }
 
 .btn-shine:hover::before,
 .btn-shine:focus-visible::before {
   transform: translateX(120%);
+}
+
+/* Primary CTA: lime fill, black ink. */
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn-accent:hover {
+  filter: brightness(1.06);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -269,11 +380,18 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .animate-hero-rise,
-  .reveal {
+  .reveal,
+  .animate-rise,
+  .animate-slide-start,
+  .animate-drop,
+  .animate-mask-up {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
+    clip-path: none !important;
+  }
+  .marquee-track {
+    animation: none !important;
   }
 }
 
@@ -290,7 +408,7 @@ body {
 }
 
 .admin-input:focus {
-  border-color: color-mix(in srgb, var(--accent-to) 60%, transparent);
+  border-color: var(--accent);
   outline: none;
 }
 
