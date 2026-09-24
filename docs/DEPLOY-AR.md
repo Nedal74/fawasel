@@ -28,9 +28,12 @@
 4. افتح ملف `supabase/schema.sql` من المشروع، **انسخ محتواه كاملًا** والصقه في
    المحرر → اضغط **Run**. المفروض يظهر `Success`. (الملف آمن لو شغّلته أكثر من
    مرة — لا يمسح أي بيانات.)
-5. من **Project Settings → API** انسخ قيمتين:
-   - **Project URL** → ستضعها في `NEXT_PUBLIC_SUPABASE_URL`
-   - **service_role** (اضغط Reveal) → ستضعها في `SUPABASE_SERVICE_ROLE_KEY`
+5. من **Project Settings → API Keys** انسخ:
+   - **Project URL** (من صفحة General، شكله `https://xxxx.supabase.co`) →
+     ستضعه في `NEXT_PUBLIC_SUPABASE_URL`
+   - **Secret key** (يبدأ بـ `sb_secret_`) أو **service_role** في المشاريع
+     الأقدم → ستضعه في `SUPABASE_SERVICE_ROLE_KEY`.
+     **ليس** `sb_publishable` — هذا مفتاح عام لا يصلح للوحة.
 
 > مفتاح `service_role` سري ويُستخدم على الخادم فقط — لا تضعه في أي مكان عام ولا
 > ترسله لأحد.
