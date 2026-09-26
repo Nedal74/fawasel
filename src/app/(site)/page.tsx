@@ -1,5 +1,6 @@
 import { ContactSection } from "@/components/public/ContactSection";
 import { Hero } from "@/components/public/Hero";
+import { PersonJsonLd } from "@/components/public/PersonJsonLd";
 import {
   AboutSection,
   ArticlesSection,
@@ -58,6 +59,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <PersonJsonLd locale={locale} withWebsite />
       {/* 01 — HERO */}
       <Hero
         image={settings.heroImage}

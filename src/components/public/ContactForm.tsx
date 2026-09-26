@@ -4,6 +4,7 @@ import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import type { UiStrings } from "@/i18n/strings";
+import { track, visitMeta } from "@/lib/track-client";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -42,9 +43,10 @@ export function ContactForm({
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, meta: visitMeta() }),
       });
       if (!response.ok) throw new Error("request failed");
+      track("form_submit", "contact_form");
       setStatus("sent");
       form.reset();
     } catch {

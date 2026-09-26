@@ -83,6 +83,9 @@ All optional locally; the admin ones are **required in production**.
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only key; never exposed to the browser |
 | `SUPABASE_MEDIA_BUCKET` | Storage bucket for uploads (default `media`) |
 | `CMS_DATA_FILE` | Override the JSON file path (file adapter only) |
+| `NEXT_PUBLIC_GA_ID` | GA4 id fallback (normally set in Dashboard → Settings) |
+| `ANALYTICS_TIMEZONE` | Day boundaries for the analytics dashboard (default `Asia/Riyadh`) |
+| `TRACKING_DATA_FILE` | Override the local analytics/chatbot JSON file (file adapter only) |
 
 Set up the admin account:
 
@@ -223,6 +226,48 @@ clothing and deep shadows; the layout keeps negative space for the typography an
 lays the red/orange glow behind the subject.
 
 ---
+
+## Growth: analytics, leads and chatbot
+
+Dashboard → **Growth** (Arabic setup guide: [`docs/GROWTH-AR.md`](docs/GROWTH-AR.md)).
+
+* **Analytics** (`/admin/analytics`) — first-party and cookie-free. The
+  browser keeps a random session id in `sessionStorage` and beacons page views
+  and WhatsApp clicks to `/api/track`; the contact form and chatbot record their
+  own conversions on the server. Today / 7 / 30 days, visits and sessions over
+  time, top pages, sources (utm_source → ad click ids → referrer), devices,
+  language, country (Vercel's geo header — no IP is stored), conversions and the
+  leads list. Bots and the signed-in admin are not counted.
+* **Chatbot** — a scripted flow edited in `/admin/chatbot` (steps, choices,
+  reorder) plus a bilingual **knowledge base** (`/admin/chat_knowledge`)
+  matched offline with Arabic normalization, light stemming, typo tolerance
+  and dashboard-editable synonyms (`src/lib/chatbot/match.ts`). Unmatched
+  questions land in `/admin/unanswered`; every conversation (choices, typed
+  questions, entry page, source) is in `/admin/conversations`, where it can be
+  marked as a lead or deleted. Visitors finish on WhatsApp or by leaving name +
+  phone (stored as a lead and mirrored to Inquiries).
+* **Swapping in an AI model later** — the chat API only calls
+  `getAnswerProvider()` in `src/lib/chatbot/provider.ts`. Implement the
+  `AnswerProvider` interface and return it there; nothing else changes.
+* Storage follows the CMS pattern: `TrackingStore` in `src/lib/tracking/`
+  with a Supabase adapter (tables `analytics_events`, `leads`,
+  `chat_conversations`, `chat_unanswered` — RLS on, no policies, so only the
+  server's service-role key can touch them) and a JSON adapter
+  (`data/tracking.json`) for local work. Tracking writes never fail a visitor's
+  request.
+
+## SEO
+
+* **hreflang** — every page is addressable per language with `?lang=en` /
+  `?lang=ar` (`src/middleware.ts`); the root layout emits `alternate` links
+  plus an `x-default`, and `sitemap.xml` lists both languages.
+* **Structured data** — `Person` + `WebSite` on the homepage, `Person` on
+  About, `Article` on each article, `CreativeWork` on projects.
+* **Google Analytics 4** — set the measurement id in Dashboard → Settings.
+  Conversions (`generate_lead`, `whatsapp_click`, `chat_start`) are mirrored
+  to GA from `src/lib/track-client.ts`.
+* **Privacy policy** at `/privacy`, fully editable in Dashboard → Hero & copy →
+  Privacy.
 
 ## Language & RTL
 

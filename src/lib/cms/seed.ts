@@ -14,6 +14,8 @@ const SEEDED: CollectionName[] = [
   "metrics",
   "social_links",
   "navigation_items",
+  "chatbot",
+  "chat_knowledge",
 ];
 
 export type SeedReport = { collection: CollectionName; inserted: number; skipped: boolean }[];
@@ -31,8 +33,9 @@ export async function seedStarterContent(store: CmsStore): Promise<SeedReport> {
   const report: SeedReport = [];
 
   for (const collection of SEEDED) {
-    const existing = await store.list(collection);
-    if (existing.length > 0) {
+    // A table missing from an older schema is skipped rather than failing all.
+    const existing = await store.list(collection).catch(() => null);
+    if (existing === null || existing.length > 0) {
       report.push({ collection, inserted: 0, skipped: true });
       continue;
     }
@@ -52,12 +55,24 @@ export async function seedStarterContent(store: CmsStore): Promise<SeedReport> {
   return report;
 }
 
+/**
+ * Starter collections that are currently empty.
+ *
+ * Checked one by one so a database where only some sections were filled (or
+ * one was cleared) still offers to load the missing starter content.
+ */
+export async function emptySeedCollections(store: CmsStore): Promise<CollectionName[]> {
+  const counts = await Promise.all(
+    SEEDED.map(async (collection) => ({
+      collection,
+      // Unreadable (table not created yet) counts as not empty: nothing to seed.
+      empty: (await store.list(collection).catch(() => [null])).length === 0,
+    })),
+  );
+  return counts.filter((entry) => entry.empty).map((entry) => entry.collection);
+}
+
 /** True when the database has no content yet (fresh Supabase project). */
 export async function isDatabaseEmpty(store: CmsStore): Promise<boolean> {
-  const [settings, content, services] = await Promise.all([
-    store.list("site_settings"),
-    store.list("site_content"),
-    store.list("services"),
-  ]);
-  return settings.length === 0 && content.length === 0 && services.length === 0;
+  return (await emptySeedCollections(store)).length === SEEDED.length;
 }

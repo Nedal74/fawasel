@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getCollectionConfig, type CollectionConfig, type Field } from "@/lib/cms/collections";
+import { seedData } from "@/lib/cms/defaults";
 import { seedStarterContent } from "@/lib/cms/seed";
 import { getStore, supabaseConfigured } from "@/lib/cms/store";
 import type { CollectionName, SiteSettings } from "@/lib/cms/types";
@@ -264,6 +265,7 @@ export async function saveSettingsAction(
     heroRevealImage: String(formData.get("heroRevealImage") ?? "").trim(),
     aboutImage: String(formData.get("aboutImage") ?? "").trim(),
     aboutMedia: formData.get("aboutMedia") === "image" ? "image" : "pills",
+    gaMeasurementId: parseGaId(formData.get("gaMeasurementId")),
     sections,
   };
 
@@ -274,6 +276,12 @@ export async function saveSettingsAction(
   }
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/** Accepts only a well-formed GA4 id; anything else turns GA off. */
+function parseGaId(value: FormDataEntryValue | null): string {
+  const id = String(value ?? "").trim().toUpperCase();
+  return /^G-[A-Z0-9]{4,16}$/.test(id) ? id : "";
 }
 
 export async function saveContentAction(
@@ -294,6 +302,24 @@ export async function saveContentAction(
       await store.update("site_content", block.id, { value: next });
     }),
   );
+
+  // Keys that exist only in the defaults (added after this site was seeded).
+  const storedKeys = new Set(blocks.map((block) => block.key));
+  for (const block of seedData().site_content) {
+    if (storedKeys.has(block.key)) continue;
+    const en = formData.get(`${block.id}.en`);
+    const ar = formData.get(`${block.id}.ar`);
+    if (en === null && ar === null) continue;
+    const next = { en: String(en ?? "").trim(), ar: String(ar ?? "").trim() };
+    if (next.en === block.value.en && next.ar === block.value.ar) continue;
+    await store.create("site_content", {
+      key: block.key,
+      group: block.group,
+      label: block.label,
+      value: next,
+      order: block.order,
+    });
+  }
 
   revalidatePath("/", "layout");
   return { ok: true };

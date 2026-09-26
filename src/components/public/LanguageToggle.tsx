@@ -1,7 +1,7 @@
 "use client";
 
 import { Languages } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
 import { LOCALE_COOKIE } from "@/lib/locale";
@@ -19,6 +19,8 @@ export function LanguageToggle({
   className?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
 
   const switchTo = locale === "en" ? "ar" : "en";
@@ -30,6 +32,13 @@ export function LanguageToggle({
       aria-label={`Switch language to ${switchTo === "ar" ? "Arabic" : "English"}`}
       onClick={() => {
         document.cookie = `${LOCALE_COOKIE}=${switchTo}; path=/; max-age=31536000; samesite=lax`;
+        // A ?lang= URL pins its language, so move to the other language's URL.
+        if (searchParams.has("lang")) {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("lang", switchTo);
+          startTransition(() => router.replace(`${pathname}?${params.toString()}`));
+          return;
+        }
         startTransition(() => router.refresh());
       }}
       className={cn(

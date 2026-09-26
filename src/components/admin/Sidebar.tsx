@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  BarChart3,
+  BookOpen,
+  Bot,
+  CircleHelp,
+  MessagesSquare,
   Blocks,
   Building2,
   Contact,
@@ -29,6 +34,16 @@ function buildGroups(t: AdminStrings) {
     {
       title: t.groupOverview,
       items: [{ href: "/admin", label: t.navDashboard, icon: LayoutDashboard }],
+    },
+    {
+      title: t.groupGrowth,
+      items: [
+        { href: "/admin/analytics", label: t.navAnalytics, icon: BarChart3 },
+        { href: "/admin/conversations", label: t.navConversations, icon: MessagesSquare },
+        { href: "/admin/unanswered", label: t.navUnanswered, icon: CircleHelp },
+        { href: "/admin/chatbot", label: t.navChatbot, icon: Bot },
+        { href: "/admin/chat_knowledge", label: t.navKnowledge, icon: BookOpen },
+      ],
     },
     {
       title: t.groupContent,
@@ -63,7 +78,7 @@ export function Sidebar({ t, onNavigate }: { t: AdminStrings; onNavigate?: () =>
   const groups = buildGroups(t);
 
   return (
-    <nav aria-label="Dashboard" className="flex h-full flex-col gap-6 p-4">
+    <nav aria-label="Dashboard" className="flex h-[calc(100%-3.5rem)] flex-col gap-6 overflow-y-auto p-4">
       {groups.map((group) => (
         <div key={group.title}>
           <p className="admin-label mb-2">{group.title}</p>

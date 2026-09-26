@@ -64,6 +64,7 @@ export function Footer({
             <li>
               <a
                 href={whatsappLink(settings.whatsapp)}
+                data-track-label="footer"
                 target="_blank"
                 rel="noreferrer noopener"
                 dir="ltr"
@@ -80,7 +81,10 @@ export function Footer({
       <div className="border-t border-[var(--color-line)]">
         <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center justify-between gap-3 px-5 py-5 sm:px-8 lg:px-12">
           <TechLabel>
-            © {new Date().getFullYear()} {copy("hero.name")} · {strings.rights}
+            © {new Date().getFullYear()} {copy("hero.name")} · {strings.rights} ·{" "}
+            <Link href="/privacy" className="underline-offset-4 transition-colors hover:text-accent hover:underline">
+              {strings.privacyPolicy}
+            </Link>
           </TechLabel>
           <TechLabel className="flex items-center gap-2">
             <span className="animate-tick inline-block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />

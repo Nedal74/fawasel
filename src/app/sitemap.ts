@@ -17,14 +17,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/articles",
     "/clients",
     "/contact",
+    "/privacy",
   ];
 
-  return [
+  // Each page exists in both languages at ?lang=… (see middleware.ts).
+  const withLanguages = (url: string) => ({
+    alternates: { languages: { en: `${url}?lang=en`, ar: `${url}?lang=ar`, "x-default": url } },
+  });
+
+  const entries: MetadataRoute.Sitemap = [
     ...staticRoutes.map((route) => ({
       url: `${BASE}${route || "/"}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
-      priority: route === "" ? 1 : 0.7,
+      priority: route === "" ? 1 : route === "/privacy" ? 0.2 : 0.7,
     })),
     ...projects.map((project) => ({
       url: `${BASE}/projects/${project.slug}`,
@@ -39,4 +45,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     })),
   ];
+  return entries.map((entry) => ({ ...entry, ...withLanguages(entry.url) }));
 }

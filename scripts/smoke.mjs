@@ -319,6 +319,114 @@ await page.getByRole("button", { name: "Start project" }).click();
 await page.waitForSelector('[role="status"]', { timeout: 15000 });
 check("contact form shows the success state", (await page.content()).includes("Received."));
 
+// --- SEO: privacy page, hreflang, structured data -------------------------
+await visit("/privacy", "PRIVACY POLICY");
+await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+check(
+  "hreflang alternates for en + ar",
+  (await page.locator('link[rel="alternate"][hreflang="ar"]').count()) > 0 &&
+    (await page.locator('link[rel="alternate"][hreflang="en"]').count()) > 0,
+);
+const ldTypes = await page.evaluate(() =>
+  [...document.querySelectorAll('script[type="application/ld+json"]')].map((node) => node.textContent ?? ""),
+);
+check("Person structured data on the homepage", ldTypes.some((text) => text.includes('"Person"')));
+await page.goto(`${BASE}/?lang=ar`, { waitUntil: "networkidle" });
+check(
+  "?lang=ar renders Arabic",
+  (await page.evaluate(() => document.documentElement.getAttribute("dir"))) === "rtl",
+);
+await context.clearCookies();
+
+// --- first-party analytics endpoint -------------------------------------------
+const beacon = await page.request.post(`${BASE}/api/track`, {
+  data: JSON.stringify({ type: "pageview", sessionId: "smoketest0001", path: "/", source: "direct", locale: "en" }),
+  headers: { "content-type": "text/plain" },
+});
+check("analytics beacon accepted", beacon.status() === 204, `status ${beacon.status()}`);
+const badBeacon = await page.request.post(`${BASE}/api/track`, { data: "{}" });
+check("analytics beacon validates input", badBeacon.status() === 422, `status ${badBeacon.status()}`);
+
+// --- chatbot ------------------------------------------------------------------
+const smokeQuestion = `smoke question ${Date.now()} zqxv`;
+await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+await page.locator("[data-chatbot-launcher]").click();
+const bot = page.locator("#site-chatbot");
+await bot.waitFor({ timeout: 10000 });
+check("chatbot opens with a greeting", (await bot.locator('[data-chat-from="bot"]').count()) > 0);
+await bot.getByRole("button", { name: "Marketing services" }).click();
+check(
+  "chatbot follows the scripted flow",
+  (await bot.getByText("Which area are you interested in?").count()) > 0,
+);
+await page.fill("#chat-input", "how much does it cost?");
+await page.keyboard.press("Enter");
+await bot.getByText("depends on the scope").waitFor({ timeout: 10000 }).catch(() => undefined);
+check("chatbot answers from the knowledge base", (await bot.getByText("depends on the scope").count()) > 0);
+await page.fill("#chat-input", smokeQuestion);
+await page.keyboard.press("Enter");
+await bot.getByText("I don't have an answer").waitFor({ timeout: 10000 }).catch(() => undefined);
+check("chatbot falls back when it has no answer", (await bot.getByText("I don't have an answer").count()) > 0);
+await page.setViewportSize({ width: 390, height: 844 });
+check(
+  "chatbot fits a phone screen",
+  await page.evaluate(() => {
+    const box = document.querySelector("#site-chatbot")?.getBoundingClientRect();
+    return Boolean(box && box.left >= 0 && box.right <= window.innerWidth && box.top >= 0);
+  }),
+);
+await page.setViewportSize({ width: 1280, height: 900 });
+
+// --- growth dashboard ---------------------------------------------------------
+// Earlier sections leave dialog handlers behind; accept each confirm() once.
+page.removeAllListeners("dialog");
+page.on("dialog", (dialog) => dialog.accept().catch(() => undefined));
+await page.goto(`${BASE}/admin/login`, { waitUntil: "networkidle" });
+await page.fill("#email", EMAIL);
+await page.fill("#password", PASSWORD);
+await Promise.all([
+  page.waitForURL("**/admin", { timeout: 15000 }),
+  page.getByRole("button", { name: "Sign in" }).click(),
+]);
+const analytics = await page.goto(`${BASE}/admin/analytics?range=30d`, { waitUntil: "networkidle" });
+check(
+  "analytics dashboard renders",
+  analytics?.status() === 200 && (await page.content()).includes("Traffic sources"),
+);
+check("contact-form lead is listed", (await page.content()).includes("Smoke Tester"));
+
+await page.goto(`${BASE}/admin/unanswered`, { waitUntil: "networkidle" });
+const unansweredRow = page.locator("[data-unanswered]", { hasText: smokeQuestion });
+check("unanswered question is logged", (await unansweredRow.count()) > 0);
+await unansweredRow.first().locator('button[aria-label="Delete"]').click();
+await page.waitForTimeout(1200);
+await page.reload({ waitUntil: "networkidle" });
+check("unanswered question deleted", (await page.locator("[data-unanswered]", { hasText: smokeQuestion }).count()) === 0);
+
+await page.goto(`${BASE}/admin/conversations`, { waitUntil: "networkidle" });
+const conversationRow = page.locator("[data-conversation]", { hasText: smokeQuestion });
+check("conversation is logged", (await conversationRow.count()) > 0);
+await conversationRow.first().locator('button[aria-label="Mark as lead"]').click();
+await page.waitForTimeout(1200);
+await page.reload({ waitUntil: "networkidle" });
+check(
+  "conversation can be marked as a lead",
+  (await page.locator("[data-conversation]", { hasText: smokeQuestion }).first().getByText("Lead", { exact: true }).count()) > 0,
+);
+await page.locator("[data-conversation]", { hasText: smokeQuestion }).first().locator('button[aria-label="Delete"]').click();
+await page.waitForTimeout(1200);
+await page.reload({ waitUntil: "networkidle" });
+check("conversation deleted", (await page.locator("[data-conversation]", { hasText: smokeQuestion }).count()) === 0);
+
+const chatbotEditor = await page.goto(`${BASE}/admin/chatbot`, { waitUntil: "networkidle" });
+check("chatbot editor renders", chatbotEditor?.status() === 200 && (await page.locator("[data-step]").count()) > 0);
+await page.getByRole("button", { name: "Save chatbot" }).click();
+await page.getByText("Chatbot saved.").waitFor({ timeout: 10000 }).catch(() => undefined);
+check("chatbot config saves", (await page.getByText("Chatbot saved.").count()) > 0);
+
+const knowledge = await page.goto(`${BASE}/admin/chat_knowledge`, { waitUntil: "networkidle" });
+check("knowledge base is editable", knowledge?.status() === 200 && (await page.content()).includes("How much do your services cost?"));
+
 // The deliberate visit to the unpublished project logs an expected 404.
 const unexpectedErrors = consoleErrors.filter(
   (message) => !message.includes("status of 404"),

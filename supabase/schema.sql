@@ -62,6 +62,9 @@ call create_cms_table('media_assets');
 call create_cms_table('site_content');
 call create_cms_table('site_settings');
 call create_cms_table('admins');
+-- Chatbot: the scripted flow (one row) and the knowledge base it answers from.
+call create_cms_table('chatbot');
+call create_cms_table('chat_knowledge');
 
 -- Inquiries hold personal data: never publicly readable.
 call create_cms_table('inquiries');
@@ -98,5 +101,94 @@ begin
       create policy "media public read" on storage.objects
         for select using (bucket_id = 'media')
     $q$;
+  end if;
+end $$;
+
+-- ===========================================================================
+-- Analytics, leads and chatbot records (added with the Growth dashboard)
+-- ===========================================================================
+--
+-- Written by the server when visitors browse, submit the contact form or use
+-- the chatbot; read only by the dashboard. RLS is enabled with NO policies, so
+-- the public (anon) key can neither read nor write these tables — only the
+-- server's service-role key can. No IP addresses or cookies are stored.
+
+create table if not exists public.analytics_events (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  session_id text not null default '',
+  type text not null,
+  path text not null default '/',
+  source text not null default 'direct',
+  referrer text not null default '',
+  device text not null default '',
+  locale text not null default '',
+  country text not null default '',
+  label text not null default ''
+);
+create index if not exists analytics_events_created_idx on public.analytics_events (created_at);
+create index if not exists analytics_events_type_created_idx on public.analytics_events (type, created_at);
+alter table public.analytics_events enable row level security;
+
+create table if not exists public.leads (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  name text not null default '',
+  phone text not null default '',
+  email text not null default '',
+  message text not null default '',
+  page text not null default '',
+  source text not null default '',
+  origin text not null default 'contact_form',
+  conversation_id uuid,
+  handled boolean not null default false
+);
+create index if not exists leads_created_idx on public.leads (created_at desc);
+drop trigger if exists leads_updated_at on public.leads;
+create trigger leads_updated_at before update on public.leads
+  for each row execute function set_updated_at();
+alter table public.leads enable row level security;
+
+create table if not exists public.chat_conversations (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  session_id text not null default '',
+  locale text not null default '',
+  page text not null default '',
+  source text not null default '',
+  device text not null default '',
+  messages jsonb not null default '[]'::jsonb,
+  is_lead boolean not null default false,
+  outcome text not null default '',
+  lead_id uuid
+);
+create index if not exists chat_conversations_created_idx on public.chat_conversations (created_at desc);
+drop trigger if exists chat_conversations_updated_at on public.chat_conversations;
+create trigger chat_conversations_updated_at before update on public.chat_conversations
+  for each row execute function set_updated_at();
+alter table public.chat_conversations enable row level security;
+
+create table if not exists public.chat_unanswered (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  question text not null,
+  locale text not null default '',
+  page text not null default '',
+  conversation_id uuid,
+  resolved boolean not null default false
+);
+create index if not exists chat_unanswered_created_idx on public.chat_unanswered (created_at desc);
+alter table public.chat_unanswered enable row level security;
+
+-- Belt and braces: the browser-facing roles get no table privileges at all.
+-- (Guarded so the file also runs on a plain Postgres without Supabase roles.)
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'anon')
+     and exists (select 1 from pg_roles where rolname = 'authenticated') then
+    execute 'revoke all on public.analytics_events, public.leads, public.chat_conversations, '
+         || 'public.chat_unanswered from anon, authenticated';
   end if;
 end $$;

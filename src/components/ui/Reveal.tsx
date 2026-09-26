@@ -106,7 +106,7 @@ export function RevealWords({
   return (
     <Tag ref={ref as React.Ref<never>} className={className}>
       {words.map((word, index) => (
-        <span key={`${word}-${index}`} className="inline-block overflow-hidden align-bottom">
+        <span key={`${word}-${index}`} className="word-mask inline-block overflow-hidden align-bottom">
           <span
             className="reveal inline-block"
             data-from="up"

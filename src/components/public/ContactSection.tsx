@@ -57,6 +57,7 @@ export function ContactSection({
             </a>
             <a
               href={whatsappLink(settings.whatsapp)}
+              data-track-label="contact"
               target="_blank"
               rel="noreferrer noopener"
               className="group flex items-center gap-4 py-5 transition-colors hover:text-accent"

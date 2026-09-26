@@ -3,6 +3,7 @@ import { IBM_Plex_Sans_Arabic, JetBrains_Mono } from "next/font/google";
 
 import { getSettings } from "@/lib/cms/queries";
 import { dirFor, getLocale, pick } from "@/lib/i18n";
+import { currentPath, getSiteUrl, languageUrl } from "@/lib/seo";
 
 import "./globals.css";
 
@@ -20,13 +21,31 @@ const arabic = IBM_Plex_Sans_Arabic({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [settings, locale] = await Promise.all([getSettings(), getLocale()]);
+  const [settings, locale, base, { path, explicitLocale }] = await Promise.all([
+    getSettings(),
+    getLocale(),
+    getSiteUrl(),
+    currentPath(),
+  ]);
   const title = pick(settings.siteTitle, locale);
   const description = pick(settings.siteDescription, locale);
-  const base = process.env.NEXT_PUBLIC_SITE_URL;
+
+  // hreflang: every public page exists in both languages at ?lang=…; the bare
+  // URL (cookie/default language) is the x-default.
+  const alternates = path.startsWith("/admin")
+    ? undefined
+    : {
+        canonical: explicitLocale ? languageUrl(path, locale) : path,
+        languages: {
+          en: languageUrl(path, "en"),
+          ar: languageUrl(path, "ar"),
+          "x-default": path,
+        },
+      };
 
   return {
-    metadataBase: base ? new URL(base) : undefined,
+    metadataBase: new URL(base),
+    alternates,
     title: { default: title, template: `%s — NEDAL ELABID` },
     description,
     keywords: settings.keywords.split(",").map((k) => k.trim()).filter(Boolean),
@@ -35,6 +54,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "profile",
       title,
       description,
+      locale: locale === "ar" ? "ar_SA" : "en_US",
+      alternateLocale: locale === "ar" ? "en_US" : "ar_SA",
       images: settings.ogImage ? [{ url: settings.ogImage }] : undefined,
     },
     twitter: {

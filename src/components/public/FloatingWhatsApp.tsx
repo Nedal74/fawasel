@@ -31,6 +31,7 @@ export function FloatingWhatsApp({
   return (
     <a
       href={whatsappLink(phone, message)}
+      data-track-label="floating"
       target="_blank"
       rel="noreferrer noopener"
       aria-label={label}

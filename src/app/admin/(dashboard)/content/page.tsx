@@ -2,6 +2,7 @@ import { ContentForm } from "@/components/admin/ContentForm";
 import { getAdminStrings } from "@/i18n/admin";
 import { getAdminLocale } from "@/lib/admin-locale";
 import { listAdmin } from "@/lib/cms/admin";
+import { seedData } from "@/lib/cms/defaults";
 import type { SiteContentBlock } from "@/lib/cms/types";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,12 @@ export default async function ContentPage() {
     getAdminLocale(),
   ]);
   const t = getAdminStrings(locale);
+
+  // Copy keys added in a later version are not in an older database yet; show
+  // their defaults so they can be edited (saving creates them).
+  const storedKeys = new Set(blocks.map((block) => block.key));
+  const missing = seedData().site_content.filter((block) => !storedKeys.has(block.key));
+  for (const block of missing) blocks.push(block);
 
   const grouped = new Map<string, SiteContentBlock[]>();
   for (const block of blocks) {

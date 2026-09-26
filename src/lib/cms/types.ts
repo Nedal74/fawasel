@@ -205,7 +205,56 @@ export interface SiteSettings extends BaseDoc {
   aboutImage: string;
   /** What fills the About section's media column. */
   aboutMedia: "pills" | "image";
+  /** Google Analytics 4 measurement id (G-XXXXXXX); empty disables GA. */
+  gaMeasurementId: string;
   sections: Record<string, boolean>;
+}
+
+/** What a chatbot choice does when the visitor picks it. */
+export type ChatActionType = "step" | "ask" | "lead" | "whatsapp" | "link" | "end";
+
+export interface ChatOption {
+  id: string;
+  label: Localized;
+  action: ChatActionType;
+  /** Step id for `step`, a URL for `link`; unused otherwise. */
+  target: string;
+}
+
+export interface ChatStep {
+  id: string;
+  /** Short name shown in the dashboard only. */
+  name: string;
+  message: Localized;
+  options: ChatOption[];
+}
+
+/** The scripted chatbot: one singleton document. */
+export interface ChatbotConfig extends BaseDoc {
+  enabled: boolean;
+  /** Seconds before the greeting bubble pops up. */
+  delaySeconds: number;
+  botName: Localized;
+  teaser: Localized;
+  startStepId: string;
+  steps: ChatStep[];
+  askPrompt: Localized;
+  noAnswer: Localized;
+  leadPrompt: Localized;
+  leadThanks: Localized;
+  whatsappMessage: Localized;
+  /** One synonym group per entry, comma separated: "price, cost, سعر, تكلفة". */
+  synonyms: string[];
+}
+
+/** A question/answer pair the chatbot answers free-text questions from. */
+export interface ChatKnowledge extends BaseDoc {
+  question: Localized;
+  answer: Localized;
+  /** Extra words or phrases (any language) that should hit this answer. */
+  keywords: string[];
+  published: boolean;
+  order: number;
 }
 
 export interface AdminUser extends BaseDoc {
@@ -230,6 +279,8 @@ export type CollectionMap = {
   site_content: SiteContentBlock;
   inquiries: Inquiry;
   site_settings: SiteSettings;
+  chatbot: ChatbotConfig;
+  chat_knowledge: ChatKnowledge;
   admins: AdminUser;
 };
 
@@ -251,6 +302,8 @@ export const COLLECTION_NAMES = [
   "site_content",
   "inquiries",
   "site_settings",
+  "chatbot",
+  "chat_knowledge",
   "admins",
 ] as const satisfies readonly CollectionName[];
 

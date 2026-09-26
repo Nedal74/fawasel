@@ -8,6 +8,7 @@ import type { CollectionName } from "./types";
 export function docLabel(doc: Record<string, unknown>, field: string): string {
   const value = doc[field];
   if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.filter((item) => typeof item === "string").join(", ");
   if (value && typeof value === "object") {
     const localized = value as { en?: string; ar?: string };
     return localized.en?.trim() || localized.ar?.trim() || "";

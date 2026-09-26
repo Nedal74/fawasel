@@ -6,6 +6,8 @@ import { LEGACY_COPY, LEGACY_SERVICE_CATEGORY, seedData } from "./defaults";
 import { getStore } from "./store";
 import type {
   Article,
+  ChatbotConfig,
+  ChatKnowledge,
   Client,
   CollectionMap,
   CollectionName,
@@ -170,3 +172,27 @@ export const getSocialLinks = cache(async (): Promise<SocialLink[]> =>
 export const getNavigation = cache(async (): Promise<NavigationItem[]> =>
   byOrder(publishedOnly(await listAll("navigation_items"))),
 );
+
+/** The chatbot config, merged over the defaults so new fields always exist. */
+export const getChatbot = cache(async (): Promise<ChatbotConfig> => {
+  const seed = seedData().chatbot[0] as ChatbotConfig;
+  const stored = (await listAll("chatbot").catch(() => []))[0];
+  if (!stored) return seed;
+  const merged = { ...seed, ...stored };
+  if (!Array.isArray(merged.steps) || merged.steps.length === 0) merged.steps = seed.steps;
+  if (!Array.isArray(merged.synonyms)) merged.synonyms = seed.synonyms;
+  return merged;
+});
+
+/**
+ * Published knowledge-base entries. Falls back to the starter entries only
+ * when the table cannot be read (e.g. the SQL update has not been run yet).
+ */
+export const getKnowledge = cache(async (): Promise<ChatKnowledge[]> => {
+  try {
+    const rows = await listAll("chat_knowledge");
+    return byOrder(publishedOnly(rows));
+  } catch {
+    return seedData().chat_knowledge;
+  }
+});

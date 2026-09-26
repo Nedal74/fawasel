@@ -142,6 +142,26 @@ export function SettingsForm({
       </section>
 
       <section>
+        <h2 className="admin-label border-b border-[var(--color-line)] pb-2">{t.gaGroup}</h2>
+        <div className="mt-4 grid gap-5 lg:grid-cols-3">
+          <div>
+            <label className="admin-label" htmlFor="gaMeasurementId">
+              {t.gaField}
+            </label>
+            <input
+              id="gaMeasurementId"
+              name="gaMeasurementId"
+              defaultValue={settings.gaMeasurementId ?? ""}
+              placeholder="G-XXXXXXXXXX"
+              dir="ltr"
+              className="admin-input"
+            />
+          </div>
+          <p className="self-end text-xs leading-relaxed text-dim lg:col-span-2">{t.gaHelp}</p>
+        </div>
+      </section>
+
+      <section>
         <h2 className="admin-label border-b border-[var(--color-line)] pb-2">{t.appearanceGroup}</h2>
         <div className="mt-4 grid gap-5 lg:grid-cols-3">
           <div>

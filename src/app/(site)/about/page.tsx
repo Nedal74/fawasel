@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/public/PageHeader";
+import { PersonJsonLd } from "@/components/public/PersonJsonLd";
 import { AboutSection, IntelligenceSection, SkillsSection } from "@/components/public/Sections";
 import { getStrings } from "@/i18n/strings";
 import {
@@ -35,6 +36,7 @@ export default async function AboutPage() {
 
   return (
     <>
+      <PersonJsonLd locale={locale} />
       <PageHeader
         eyebrow={copy("about.eyebrow")}
         title={copy("about.heading")}

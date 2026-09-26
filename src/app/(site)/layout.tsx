@@ -1,8 +1,12 @@
+import { ChatBot } from "@/components/public/ChatBot";
 import { FloatingWhatsApp } from "@/components/public/FloatingWhatsApp";
 import { Footer } from "@/components/public/Footer";
+import { GoogleAnalytics } from "@/components/public/GoogleAnalytics";
 import { Navbar } from "@/components/public/Navbar";
+import { SiteTracker } from "@/components/public/SiteTracker";
 import { getStrings } from "@/i18n/strings";
 import {
+  getChatbot,
   getContentMap,
   getNavigation,
   getSettings,
@@ -12,11 +16,12 @@ import { getLocale, makeCopy, pick } from "@/lib/i18n";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
-  const [settings, navigation, socials, content] = await Promise.all([
+  const [settings, navigation, socials, content, chatbot] = await Promise.all([
     getSettings(),
     getNavigation(),
     getSocialLinks(),
     getContentMap(),
+    getChatbot(),
   ]);
 
   const strings = getStrings(locale);
@@ -52,6 +57,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         label={strings.letsTalk}
         message={`${copy("hero.name")} — ${strings.startProject}`}
       />
+
+      <ChatBot config={chatbot} locale={locale} strings={strings} whatsapp={settings.whatsapp} />
+      <SiteTracker />
+      <GoogleAnalytics id={settings.gaMeasurementId || process.env.NEXT_PUBLIC_GA_ID || ""} />
 
       <Footer
         settings={settings}

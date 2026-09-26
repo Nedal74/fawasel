@@ -10,6 +10,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { getStrings } from "@/i18n/strings";
 import { getArticleBySlug, getArticles, getContentMap } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
+import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { formatDate, parseArticleBody } from "@/lib/utils";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -50,21 +51,31 @@ export default async function ArticlePage({ params }: Params) {
   const body = parseArticleBody(pick(article.content, locale));
   const related = all.filter((row) => row.id !== article.id).slice(0, 3);
 
-  const jsonLd = {
+  const base = await getSiteUrl();
+  const url = `${base}/articles/${article.slug}`;
+  const authorName = article.author || copy("hero.name");
+  const articleLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: title,
+    "@id": `${url}#article`,
+    headline: title.slice(0, 110),
     description: pick(article.summary, locale),
-    datePublished: article.date || undefined,
-    author: { "@type": "Person", name: article.author || copy("hero.name") },
-    ...(article.coverImage ? { image: article.coverImage } : {}),
+    inLanguage: locale,
+    url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    datePublished: article.date || article.createdAt,
+    dateModified: article.updatedAt,
+    articleSection: category || undefined,
+    author: { "@type": "Person", name: authorName, url: `${base}/about` },
+    publisher: { "@type": "Person", "@id": `${base}/#person`, name: copy("hero.name") },
+    ...(article.coverImage ? { image: absoluteUrl(base, article.coverImage) } : {}),
   };
 
   return (
     <article>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(articleLd) }}
       />
 
       <Container as="header" className="grain relative pb-10 pt-40 lg:pt-48">

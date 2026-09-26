@@ -148,7 +148,15 @@ body {
 
 [lang="ar"] .display {
   letter-spacing: 0;
-  line-height: 1.15;
+  line-height: 1.4;
+  /* Arabic ascenders/descenders sit outside the Latin cap box; give them room
+     so headlines are not clipped on narrow screens. */
+  padding-block: 0.04em;
+}
+
+/* The per-word reveal mask would crop Arabic glyphs; let them overflow. */
+[lang="ar"] .word-mask {
+  overflow: visible;
 }
 
 /*
@@ -419,4 +427,10 @@ body {
   text-transform: uppercase;
   color: var(--color-muted);
   margin-bottom: 0.35rem;
+}
+
+/* Table headers reuse the label style but must stay table cells. */
+th.admin-label {
+  display: table-cell;
+  margin-bottom: 0;
 }

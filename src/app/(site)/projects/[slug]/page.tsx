@@ -17,6 +17,7 @@ import {
   getSettings,
 } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
+import { jsonLd as toJsonLd } from "@/lib/seo";
 import { whatsappLink } from "@/lib/utils";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -102,7 +103,7 @@ export default async function ProjectPage({ params }: Params) {
     <article>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }}
       />
 
       {/* Cover */}

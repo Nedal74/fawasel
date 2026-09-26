@@ -6,7 +6,7 @@ import { getAdminLocale } from "@/lib/admin-locale";
 import { adminCollections, collectionLabel } from "@/lib/cms/collections";
 import { listAdmin } from "@/lib/cms/admin";
 import { seedStarterContentAction } from "@/app/admin/actions";
-import { isDatabaseEmpty } from "@/lib/cms/seed";
+import { emptySeedCollections } from "@/lib/cms/seed";
 import { getStore } from "@/lib/cms/store";
 import type { Inquiry } from "@/lib/cms/types";
 
@@ -17,10 +17,11 @@ export default async function AdminHome({
 }) {
   const { seeded } = await searchParams;
   const store = await getStore();
-  const empty = await isDatabaseEmpty(store);
+  const missing = await emptySeedCollections(store);
   const counts = await Promise.all(
     adminCollections.map(async (config) => {
-      const rows = (await store.list(config.name)) as { published?: boolean }[];
+      // A table not created yet (older schema) counts as empty, not a crash.
+      const rows = (await store.list(config.name).catch(() => [])) as { published?: boolean }[];
       return {
         config,
         total: rows.length,
@@ -36,6 +37,14 @@ export default async function AdminHome({
   const t = getAdminStrings(locale);
   const recent = [...inquiries].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
   const projects = counts.find((entry) => entry.config.name === "projects");
+  const sectionLabel = (name: string) => {
+    const config = adminCollections.find((entry) => entry.name === name);
+    if (config) return collectionLabel(config, locale);
+    if (name === "site_settings") return t.navSettings;
+    if (name === "site_content") return t.navContent;
+    if (name === "chatbot") return t.navChatbot;
+    return name;
+  };
 
   return (
     <div className="space-y-10">
@@ -51,11 +60,17 @@ export default async function AdminHome({
         </p>
       ) : null}
 
-      {empty ? (
+      {missing.length > 0 ? (
         <div className="rounded border border-[var(--color-line)] bg-graphite p-5">
           <p className="flex items-start gap-3 text-sm text-muted">
             <Sprout className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
             {t.emptyDatabase}
+          </p>
+          <p className="mt-3 text-xs text-dim" data-missing-sections>
+            {t.missingStarter}{" "}
+            <span className="text-offwhite">
+              {missing.map((name) => sectionLabel(name)).join(locale === "ar" ? "، " : ", ")}
+            </span>
           </p>
           <form action={seedStarterContentAction} className="mt-4">
             <button

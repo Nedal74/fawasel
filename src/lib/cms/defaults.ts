@@ -1,4 +1,12 @@
-import type { CollectionMap, CollectionName, Localized } from "./types";
+import type {
+  ChatActionType,
+  ChatbotConfig,
+  ChatOption,
+  ChatStep,
+  CollectionMap,
+  CollectionName,
+  Localized,
+} from "./types";
 
 /**
  * Seed content.
@@ -156,7 +164,194 @@ const contentSeed: [string, string, string, string, string][] = [
   ["contact.heading", "Contact", "START A PROJECT", "ابدأ مشروعًا", ""],
   ["contact.intro", "Contact", "Tell me about the business first — the campaign comes after.", "حدثني عن النشاط التجاري أولًا — الحملة تأتي بعد ذلك.", ""],
   ["contact.success", "Contact", "Received. I'll reply from nedotito74@gmail.com within one business day.", "تم الاستلام. سأرد من nedotito74@gmail.com خلال يوم عمل واحد.", ""],
+  ["privacy.eyebrow", "Privacy", "Legal", "قانوني", ""],
+  ["privacy.heading", "Privacy", "PRIVACY POLICY", "سياسة الخصوصية", ""],
+  ["privacy.intro", "Privacy", "How this site handles your information — in plain language.", "كيف يتعامل هذا الموقع مع معلوماتك — بلغة واضحة.", ""],
+  ["privacy.updated", "Privacy", "Last updated: September 2026", "آخر تحديث: سبتمبر 2026", ""],
+  ["privacy.body", "Privacy", "This site is the personal portfolio of Nedal Elabid. This policy explains what information the site collects, why, and what you can do about it.\n\n## What we collect\n\n**When you use the contact form:** your name and phone number, plus anything optional you choose to add (email, company, service, budget, project details).\n\n**When you use the chat assistant:** the choices you pick and the questions you type, the page you started on, and — only if you choose to leave them — your name and phone number.\n\n**When you browse:** anonymous usage statistics — which pages are viewed, the site you came from (for example Google or LinkedIn), device type (mobile, tablet or desktop), site language and country. The country is derived by our hosting provider; your IP address is not stored.\n\n## Cookies and similar technologies\n\nThe built-in statistics use **no cookies**. A random session number is kept in your browser's session storage and is deleted when you close the tab. The site sets one small cookie to remember your language choice.\n\nIf Google Analytics is enabled, Google sets its own analytics cookies. You can block them in your browser settings or with Google's opt-out add-on.\n\n## How we use it\n\nOnly to reply to your request, to understand which content is useful, and to improve the site. We do not sell your data or use it for advertising profiles.\n\n## Who processes it\n\nThe site is hosted on Vercel and its data is stored with Supabase. If you choose to continue on WhatsApp, your conversation happens on WhatsApp under its own privacy policy. Google processes analytics data when Google Analytics is enabled.\n\n## How long we keep it\n\nEnquiries and chat conversations are kept for as long as they are needed to follow up with you, and anonymous statistics for up to 13 months. You can ask for your data to be deleted at any time.\n\n## Your rights\n\nYou can ask to see, correct or delete the personal data we hold about you, in line with applicable data protection laws including Saudi Arabia's Personal Data Protection Law (PDPL). Email nedotito74@gmail.com and we will respond within 30 days.", "هذا الموقع هو معرض الأعمال الشخصي لنضال الأبيض. توضّح هذه السياسة المعلومات التي يجمعها الموقع، ولماذا، وما الذي يمكنك فعله بشأنها.\n\n## ما الذي نجمعه\n\n**عند استخدام نموذج التواصل:** اسمك ورقم هاتفك، وأي معلومات اختيارية تضيفها (البريد الإلكتروني، الشركة، الخدمة، الميزانية، تفاصيل المشروع).\n\n**عند استخدام المساعد الآلي (الشات بوت):** الاختيارات التي تضغط عليها والأسئلة التي تكتبها، والصفحة التي بدأت منها، واسمك ورقمك فقط إذا اخترت تركهما.\n\n**أثناء التصفح:** إحصائيات استخدام مجهولة الهوية — الصفحات التي تمت زيارتها، والموقع الذي جئت منه (مثل جوجل أو لينكدإن)، ونوع الجهاز (جوال أو تابلت أو كمبيوتر)، ولغة الموقع، والدولة. تُستنتج الدولة عن طريق مزوّد الاستضافة، ولا يتم حفظ عنوان IP الخاص بك.\n\n## ملفات تعريف الارتباط (الكوكيز) والتقنيات المشابهة\n\nالإحصائيات الداخلية للموقع **لا تستخدم أي كوكيز**. يُحفظ رقم جلسة عشوائي في ذاكرة الجلسة بمتصفحك ويُحذف عند إغلاق التبويب. يستخدم الموقع ملف كوكيز صغيرًا واحدًا لتذكّر اللغة التي اخترتها.\n\nإذا كانت خدمة Google Analytics مفعّلة، فإن جوجل تضع ملفات الكوكيز الخاصة بها. يمكنك حظرها من إعدادات المتصفح أو عبر إضافة إلغاء الاشتراك من جوجل.\n\n## كيف نستخدم المعلومات\n\nللرد على طلبك فقط، ولفهم المحتوى المفيد، ولتحسين الموقع. لا نبيع بياناتك ولا نستخدمها لبناء ملفات إعلانية.\n\n## من يعالج البيانات\n\nالموقع مستضاف على Vercel وبياناته محفوظة لدى Supabase. إذا اخترت المتابعة عبر واتساب فإن محادثتك تتم على واتساب وفق سياسة الخصوصية الخاصة به. تعالج جوجل بيانات التحليلات عند تفعيل Google Analytics.\n\n## مدة الاحتفاظ بالبيانات\n\nتُحفظ الطلبات ومحادثات الشات بوت طوال المدة اللازمة لمتابعتك، والإحصائيات المجهولة لمدة أقصاها ١٣ شهرًا. يمكنك طلب حذف بياناتك في أي وقت.\n\n## حقوقك\n\nيحق لك طلب الاطلاع على بياناتك الشخصية أو تصحيحها أو حذفها، وفقًا لأنظمة حماية البيانات المعمول بها ومنها نظام حماية البيانات الشخصية في المملكة العربية السعودية. راسلنا على nedotito74@gmail.com وسنرد خلال ٣٠ يومًا.", ""],
   ["footer.statement", "Footer", "Marketing manager and creative director building growth systems for real estate, healthcare and e-commerce brands in Saudi Arabia.", "مدير تسويق ومدير إبداعي يبني أنظمة نمو لعلامات العقار والرعاية الصحية والتجارة الإلكترونية في السعودية.", ""],
+];
+
+/* ---------------------------------------------------------------- chatbot -- */
+
+type OptionSeed = [string, string, string, ChatActionType, string];
+
+const option = ([id, en, ar, action, target]: OptionSeed): ChatOption => ({
+  id,
+  label: L(en, ar),
+  action,
+  target,
+});
+
+const TALK: OptionSeed = ["talk", "Talk to Nedal on WhatsApp", "كلّم نضال على واتساب", "whatsapp", ""];
+const DETAILS: OptionSeed = ["details", "Leave my details", "اترك بياناتي", "lead", ""];
+const MENU: OptionSeed = ["menu", "Main menu", "القائمة الرئيسية", "step", "start"];
+
+const chatSteps: ChatStep[] = [
+  {
+    id: "start",
+    name: "Welcome",
+    message: L(
+      "Hi 👋 I'm Nedal's assistant. How can I help you today?",
+      "أهلًا 👋 أنا مساعد نضال. كيف أقدر أساعدك اليوم؟",
+    ),
+    options: [
+      option(["services", "Marketing services", "خدمات التسويق", "step", "services"]),
+      option(["quote", "I have a project — get a quote", "عندي مشروع وأريد عرض سعر", "lead", ""]),
+      option(["ask", "Ask a question", "أسأل سؤالًا", "ask", ""]),
+      option(TALK),
+    ],
+  },
+  {
+    id: "services",
+    name: "Services",
+    message: L("Which area are you interested in?", "أي مجال يهمك أكثر؟"),
+    options: [
+      option(["strategy", "Strategy & branding", "الاستراتيجية والعلامة التجارية", "step", "strategy"]),
+      option(["performance", "Paid ads & lead generation", "الإعلانات الممولة وتوليد العملاء", "step", "performance"]),
+      option(["realestate", "Real estate marketing", "التسويق العقاري", "step", "realestate"]),
+      option(["creative", "Content & creative", "المحتوى والإبداع", "step", "creative"]),
+      option(MENU),
+    ],
+  },
+  {
+    id: "strategy",
+    name: "Strategy",
+    message: L(
+      "Strategy comes first: market, offer and audience analysis, then positioning, messaging and a brand identity that can be defended. Want to talk about your business?",
+      "الاستراتيجية أولًا: تحليل السوق والعرض والجمهور، ثم التموضع والرسائل وهوية علامة يصعب منافستها. تحب نتكلم عن نشاطك؟",
+    ),
+    options: [option(TALK), option(DETAILS), option(MENU)],
+  },
+  {
+    id: "performance",
+    name: "Performance",
+    message: L(
+      "Paid campaigns are built around the cost of a qualified lead, not impressions — with landing pages, qualification flows and reporting included.",
+      "الحملات الممولة تُبنى على تكلفة العميل المؤهل لا على عدد الظهور — مع صفحات الهبوط ومسارات تأهيل العملاء والتقارير.",
+    ),
+    options: [option(TALK), option(DETAILS), option(MENU)],
+  },
+  {
+    id: "realestate",
+    name: "Real estate",
+    message: L(
+      "Real estate is a core specialty: project launches, unit sell-through and broker-grade lead engines.",
+      "التسويق العقاري من أهم التخصصات: إطلاق المشاريع وتصريف الوحدات وبناء محركات عملاء محتملين.",
+    ),
+    options: [option(TALK), option(DETAILS), option(MENU)],
+  },
+  {
+    id: "creative",
+    name: "Creative",
+    message: L(
+      "Creative direction, content systems, design and drone videography — all kept on-brand and measured.",
+      "إدارة إبداعية وأنظمة محتوى وتصميم وتصوير درون — كلها متسقة مع الهوية وقابلة للقياس.",
+    ),
+    options: [option(TALK), option(DETAILS), option(MENU)],
+  },
+];
+
+export const DEFAULT_CHATBOT: Omit<ChatbotConfig, "id" | "createdAt" | "updatedAt"> = {
+  enabled: true,
+  delaySeconds: 7,
+  botName: L("Nedal's assistant", "مساعد نضال"),
+  teaser: L("Hi 👋 Need help with your marketing?", "أهلًا 👋 تحتاج مساعدة في التسويق؟"),
+  startStepId: "start",
+  steps: chatSteps,
+  askPrompt: L("Type your question below and I'll do my best to answer.", "اكتب سؤالك بالأسفل وسأحاول الإجابة."),
+  noAnswer: L(
+    "I don't have an answer for that yet — I've passed it to Nedal. You can reach him directly on WhatsApp or leave your details.",
+    "لا أملك إجابة على هذا بعد — تم تسجيل سؤالك لنضال. يمكنك التواصل معه مباشرة على واتساب أو ترك بياناتك.",
+  ),
+  leadPrompt: L(
+    "Leave your name and number and Nedal will get back to you within one business day.",
+    "اترك اسمك ورقمك وسيتواصل معك نضال خلال يوم عمل واحد.",
+  ),
+  leadThanks: L("Thank you! Your details reached Nedal.", "شكرًا لك! وصلت بياناتك إلى نضال."),
+  whatsappMessage: L(
+    "Hi Nedal, I came from your website assistant.",
+    "مرحبًا نضال، تواصلت معك من خلال مساعد الموقع.",
+  ),
+  synonyms: [
+    "price, prices, pricing, cost, costs, fee, fees, budget, quote, rate, how much, سعر, اسعار, تكلفه, تكاليف, ميزانيه, بكم, كم السعر, كم التكلفه, عرض سعر, فلوس",
+    "contact, reach, call, phone, number, mobile, whatsapp, email, mail, تواصل, اتواصل, اتصال, رقم, جوال, موبايل, واتساب, وتساب, ايميل, بريد",
+    "service, services, offer, provide, خدمه, خدمات, تقدم, تقدمون, تقدمه, مجالات",
+    "ad, ads, advertising, advert, campaign, campaigns, paid, media buying, performance, اعلان, اعلانات, حمله, حملات, ممول, ممموله, اداء",
+    "real estate, property, properties, developer, apartment, units, عقار, عقارات, عقاري, عقاريه, تطوير عقاري, وحدات, شقق",
+    "portfolio, previous work, case studies, case study, examples, samples, اعمال, اعمالك, اعمالكم, سابقه, نماذج, بورتفوليو",
+    "hello, hi, hey, salam, السلام عليكم, سلام, اهلا, مرحبا, هلا, صباح الخير, مساء الخير",
+    "brand, branding, identity, logo, هويه, براند, شعار, لوجو, لوقو, علامه تجاريه",
+    "social media, instagram, snapchat, tiktok, content, سوشيال, سوشال ميديا, محتوي, محتوى, انستقرام, سناب, تيك توك",
+    "where, location, located, based, city, office, مكان, موقع, وين, فين, مقر, مكتب, الرياض",
+  ],
+};
+
+const knowledgeSeed: [string, string, string, string, string, string][] = [
+  [
+    "greeting",
+    "Hello",
+    "مرحبا",
+    "Hello! 👋 Ask me about services, how Nedal works, pricing or how to get in touch.",
+    "أهلًا بك! 👋 اسألني عن الخدمات أو طريقة العمل أو الأسعار أو طرق التواصل.",
+    "hi, hey, السلام عليكم, اهلا, هلا",
+  ],
+  [
+    "services",
+    "What services do you offer?",
+    "ما الخدمات التي تقدمها؟",
+    "Marketing strategy, brand strategy, performance marketing and media buying, lead generation, social media and content, creative direction, real estate marketing, websites and AI-assisted marketing. The full list is on the Services page.",
+    "استراتيجية التسويق واستراتيجية العلامة، تسويق الأداء وشراء الوسائط، توليد العملاء المحتملين، السوشيال ميديا والمحتوى، الإدارة الإبداعية، التسويق العقاري، تطوير المواقع والتسويق بالذكاء الاصطناعي. القائمة الكاملة في صفحة الخدمات.",
+    "what do you do, شغلك, تشتغل في ايه",
+  ],
+  [
+    "pricing",
+    "How much do your services cost?",
+    "كم تكلفة الخدمات؟",
+    "It depends on the scope and the business goal, so every engagement is quoted after a short conversation about your business. Leave your details or message Nedal on WhatsApp for a quote.",
+    "تعتمد التكلفة على نطاق العمل والهدف التجاري، لذلك يُحدَّد عرض السعر بعد محادثة قصيرة عن نشاطك. اترك بياناتك أو راسل نضال على واتساب للحصول على عرض سعر.",
+    "quotation, package, packages, باقات, باقه",
+  ],
+  [
+    "real-estate",
+    "Do you work on real estate projects?",
+    "هل تعمل في التسويق العقاري؟",
+    "Yes — real estate is a core specialty: project launches, unit sell-through and lead generation for developers and brokers.",
+    "نعم — التسويق العقاري من أهم التخصصات: إطلاق المشاريع وتصريف الوحدات وتوليد العملاء للمطورين والوسطاء.",
+    "broker, brokers, وسيط, مطور",
+  ],
+  [
+    "ads",
+    "Do you manage paid ads?",
+    "هل تدير الحملات الإعلانية الممولة؟",
+    "Yes. Campaigns on Meta, Google, Snapchat and TikTok are planned around the cost of a qualified lead, with tracking and reporting included.",
+    "نعم. الحملات على ميتا وجوجل وسناب شات وتيك توك تُخطَّط على أساس تكلفة العميل المؤهل، مع التتبع والتقارير.",
+    "meta, google ads, facebook ads, سناب شات, تيك توك, جوجل",
+  ],
+  [
+    "contact",
+    "How can I contact Nedal?",
+    "كيف أتواصل مع نضال؟",
+    "The fastest way is WhatsApp (the green button on the page). You can also use the form on the Contact page — replies come within one business day.",
+    "أسرع طريقة هي واتساب (الزر الأخضر في الصفحة). ويمكنك أيضًا استخدام نموذج صفحة التواصل — الرد خلال يوم عمل واحد.",
+    "talk, تكلم, كلم",
+  ],
+  [
+    "portfolio",
+    "Can I see previous work?",
+    "هل يمكنني رؤية أعمال سابقة؟",
+    "Yes — case studies are on the Work page, and the Clients page lists brands Nedal has worked with.",
+    "نعم — دراسات الحالة موجودة في صفحة الأعمال، وصفحة العملاء تعرض العلامات التي عمل معها نضال.",
+    "clients, عملاء",
+  ],
+  [
+    "location",
+    "Where are you based?",
+    "أين مقرك؟",
+    "Riyadh, Saudi Arabia.",
+    "الرياض، المملكة العربية السعودية.",
+    "saudi, ksa, السعوديه",
+  ],
 ];
 
 /**
@@ -185,6 +380,16 @@ export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
     media_assets: [],
     inquiries: [],
     admins: [],
+    chatbot: [stamp<"chatbot">("chatbot", structuredClone(DEFAULT_CHATBOT))],
+    chat_knowledge: knowledgeSeed.map(([id, qen, qar, aen, aar, keywords], i) =>
+      stamp<"chat_knowledge">(`kb-${id}`, {
+        question: L(qen, qar),
+        answer: L(aen, aar),
+        keywords: keywords.split(",").map((word) => word.trim()).filter(Boolean),
+        published: true,
+        order: i,
+      }),
+    ),
     services: serviceSeed.map(([id, en, ar, den, dar], i) =>
       stamp<"services">(`svc-${id}`, {
         title: L(en, ar),
@@ -281,6 +486,7 @@ export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
         heroRevealImage: "",
         aboutImage: "/images/portrait-about.svg",
         aboutMedia: "pills",
+        gaMeasurementId: "",
         sections: {
           about: true,
           services: true,
