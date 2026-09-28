@@ -205,6 +205,10 @@ export interface SiteSettings extends BaseDoc {
   aboutImage: string;
   /** What fills the About section's media column. */
   aboutMedia: "pills" | "image";
+  /** City shown in structured data (the person's address). */
+  addressLocality: Localized;
+  /** ISO 3166-1 alpha-2 country code, e.g. "SA". */
+  addressCountry: string;
   /** Google Analytics 4 measurement id (G-XXXXXXX); empty disables GA. */
   gaMeasurementId: string;
   sections: Record<string, boolean>;

@@ -434,3 +434,15 @@ th.admin-label {
   display: table-cell;
   margin-bottom: 0;
 }
+
+/* Project gallery thumbnail strip: a thin, quiet horizontal scrollbar. */
+.gallery-strip {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+.gallery-strip::-webkit-scrollbar {
+  height: 4px;
+}
+.gallery-strip::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+}

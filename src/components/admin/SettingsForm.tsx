@@ -138,6 +138,43 @@ export function SettingsForm({
               <option value="ar">{t.languageArabic}</option>
             </select>
           </div>
+          <div>
+            <label className="admin-label" htmlFor="addressLocality-en">
+              {t.cityField} ({t.languageEnglish})
+            </label>
+            <input
+              id="addressLocality-en"
+              name="addressLocality.en"
+              defaultValue={settings.addressLocality?.en ?? ""}
+              className="admin-input"
+            />
+          </div>
+          <div>
+            <label className="admin-label" htmlFor="addressLocality-ar">
+              {t.cityField} ({t.languageArabic})
+            </label>
+            <input
+              id="addressLocality-ar"
+              name="addressLocality.ar"
+              defaultValue={settings.addressLocality?.ar ?? ""}
+              dir="rtl"
+              className="admin-input"
+            />
+          </div>
+          <div>
+            <label className="admin-label" htmlFor="addressCountry">
+              {t.countryField}
+            </label>
+            <input
+              id="addressCountry"
+              name="addressCountry"
+              defaultValue={settings.addressCountry ?? ""}
+              maxLength={2}
+              dir="ltr"
+              className="admin-input max-w-[6rem] uppercase"
+            />
+            <p className="mt-1 text-xs text-dim">{t.countryHelp}</p>
+          </div>
         </div>
       </section>
 

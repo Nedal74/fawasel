@@ -198,6 +198,7 @@ await page.fill("#summary-en", "A project created by the automated smoke test.")
 await page.fill("#category-en", "Performance");
 await page.fill("#year", "2026");
 await page.check('input[name="featured"]');
+await page.fill("#gallery", "/images/portrait-hero.svg\n/images/og-image.svg\n/images/portrait-about.svg");
 await Promise.all([
   page.waitForURL(/\/admin\/projects\/(?!new)[^/]+/, { timeout: 15000 }),
   page.getByRole("button", { name: "Save", exact: true }).click(),
@@ -206,6 +207,27 @@ const createdPath = new URL(page.url()).pathname;
 check("project created", /^\/admin\/projects\/[^/]+$/.test(createdPath) && !createdPath.endsWith("/new"), createdPath);
 
 await visit(`/projects/${slug}`, "Smoke Test Campaign");
+
+// Project gallery: fixed-ratio stage, circular arrows, lightbox.
+const galleryCounter = () =>
+  page.locator("[data-gallery-counter]").innerText().then((text) => text.replace(/\s/g, ""));
+await page.locator("[data-gallery-counter]").scrollIntoViewIfNeeded();
+check("gallery shows a counter", (await galleryCounter()) === "1/3", await galleryCounter());
+await page.getByRole("button", { name: "Previous image" }).click();
+check("gallery wraps to the last image", (await galleryCounter()) === "3/3", await galleryCounter());
+await page.getByRole("button", { name: "Next image" }).click();
+await page.getByRole("button", { name: "Next image" }).click();
+check("gallery advances", (await galleryCounter()) === "2/3", await galleryCounter());
+check(
+  "gallery images are contained, not cropped",
+  (await page.evaluate(
+    () => getComputedStyle(document.querySelector("[data-gallery-counter]").parentElement.querySelector("img")).objectFit,
+  )) === "contain",
+);
+await page.getByRole("button", { name: /Click to enlarge/ }).click();
+check("gallery lightbox opens", await page.locator("[data-gallery-lightbox]").isVisible());
+await page.keyboard.press("Escape");
+check("gallery lightbox closes on Esc", (await page.locator("[data-gallery-lightbox]").count()) === 0);
 await page.goto(`${BASE}/projects`, { waitUntil: "networkidle" });
 check("project appears in the work listing", (await page.content()).includes("Smoke Test Campaign"));
 await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
@@ -331,6 +353,20 @@ const ldTypes = await page.evaluate(() =>
   [...document.querySelectorAll('script[type="application/ld+json"]')].map((node) => node.textContent ?? ""),
 );
 check("Person structured data on the homepage", ldTypes.some((text) => text.includes('"Person"')));
+check("exactly one JSON-LD block per page", ldTypes.length === 1, `${ldTypes.length} blocks`);
+await page.goto(`${BASE}/about`, { waitUntil: "networkidle" });
+const aboutGraph = await page.evaluate(() =>
+  [...document.querySelectorAll('script[type="application/ld+json"]')].map((node) => JSON.parse(node.textContent ?? "{}")),
+);
+const aboutNodes = aboutGraph[0]?.["@graph"] ?? [];
+const aboutIds = aboutNodes.map((node) => node["@id"]).filter(Boolean);
+check(
+  "About is a ProfilePage whose mainEntity is #person",
+  aboutGraph.length === 1 &&
+    aboutNodes.some((node) => node["@type"] === "ProfilePage" && String(node.mainEntity?.["@id"]).endsWith("/#person")),
+);
+check("no duplicate @id in the graph", new Set(aboutIds).size === aboutIds.length, aboutIds.join(", "));
+check("breadcrumb on inner pages", aboutNodes.some((node) => node["@type"] === "BreadcrumbList"));
 await page.goto(`${BASE}/?lang=ar`, { waitUntil: "networkidle" });
 check(
   "?lang=ar renders Arabic",

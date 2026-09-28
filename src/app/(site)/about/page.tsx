@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/public/PageHeader";
-import { PersonJsonLd } from "@/components/public/PersonJsonLd";
 import { AboutSection, IntelligenceSection, SkillsSection } from "@/components/public/Sections";
 import { getStrings } from "@/i18n/strings";
 import {
@@ -12,11 +11,10 @@ import {
   getSkills,
 } from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [content, locale] = await Promise.all([getContentMap(), getLocale()]);
-  const copy = makeCopy(content, locale);
-  return { title: copy("about.heading"), description: copy("about.lead") };
+  return pageMetadata("/about");
 }
 
 export default async function AboutPage() {
@@ -36,7 +34,6 @@ export default async function AboutPage() {
 
   return (
     <>
-      <PersonJsonLd locale={locale} />
       <PageHeader
         eyebrow={copy("about.eyebrow")}
         title={copy("about.heading")}

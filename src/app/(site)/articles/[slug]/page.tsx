@@ -10,30 +10,14 @@ import { Reveal } from "@/components/ui/Reveal";
 import { getStrings } from "@/i18n/strings";
 import { getArticleBySlug, getArticles, getContentMap } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
-import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo-pages";
 import { formatDate, parseArticleBody } from "@/lib/utils";
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const [article, locale] = await Promise.all([getArticleBySlug(slug), getLocale()]);
-  if (!article) return { title: "Not found" };
-
-  const title = pick(article.seoTitle, locale) || pick(article.title, locale);
-  const description = pick(article.seoDescription, locale) || pick(article.summary, locale);
-  return {
-    title,
-    description,
-    openGraph: {
-      type: "article",
-      title,
-      description,
-      publishedTime: article.date || undefined,
-      images: article.coverImage ? [{ url: article.coverImage }] : undefined,
-    },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  return pageMetadata(`/articles/${slug}`);
 }
 
 export default async function ArticlePage({ params }: Params) {
@@ -51,33 +35,8 @@ export default async function ArticlePage({ params }: Params) {
   const body = parseArticleBody(pick(article.content, locale));
   const related = all.filter((row) => row.id !== article.id).slice(0, 3);
 
-  const base = await getSiteUrl();
-  const url = `${base}/articles/${article.slug}`;
-  const authorName = article.author || copy("hero.name");
-  const articleLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "@id": `${url}#article`,
-    headline: title.slice(0, 110),
-    description: pick(article.summary, locale),
-    inLanguage: locale,
-    url,
-    mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    datePublished: article.date || article.createdAt,
-    dateModified: article.updatedAt,
-    articleSection: category || undefined,
-    author: { "@type": "Person", name: authorName, url: `${base}/about` },
-    publisher: { "@type": "Person", "@id": `${base}/#person`, name: copy("hero.name") },
-    ...(article.coverImage ? { image: absoluteUrl(base, article.coverImage) } : {}),
-  };
-
   return (
     <article>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(articleLd) }}
-      />
-
       <Container as="header" className="grain relative pb-10 pt-40 lg:pt-48">
         <div className="grid-field pointer-events-none absolute inset-0 -z-10 opacity-40" aria-hidden />
         <Link
@@ -101,7 +60,14 @@ export default async function ArticlePage({ params }: Params) {
           ) : null}
           {article.author ? (
             <TechLabel>
-              {strings.writtenBy} {article.author}
+              {strings.writtenBy}{" "}
+              {isOwner(article.author, content["hero.name"]?.value) ? (
+                <Link href="/about" rel="author" className="transition-colors hover:text-accent">
+                  {article.author}
+                </Link>
+              ) : (
+                article.author
+              )}
             </TechLabel>
           ) : null}
           <DataTicks count={14} className="ms-auto h-3" />
@@ -179,4 +145,10 @@ export default async function ArticlePage({ params }: Params) {
       </Container>
     </article>
   );
+}
+
+/** True when an article byline is the site owner's own name (either language). */
+function isOwner(author: string, name: { en: string; ar: string } | undefined): boolean {
+  const byline = author.trim().toLowerCase();
+  return Boolean(name && [name.en, name.ar].some((known) => known.trim().toLowerCase() === byline));
 }

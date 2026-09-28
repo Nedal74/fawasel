@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
+
 import { ContactSection } from "@/components/public/ContactSection";
 import { Hero } from "@/components/public/Hero";
-import { PersonJsonLd } from "@/components/public/PersonJsonLd";
 import {
   AboutSection,
   ArticlesSection,
@@ -25,6 +26,11 @@ import {
   getTestimonials,
 } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo-pages";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/");
+}
 
 export default async function HomePage() {
   const locale = await getLocale();
@@ -59,7 +65,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <PersonJsonLd locale={locale} withWebsite />
       {/* 01 — HERO */}
       <Hero
         image={settings.heroImage}

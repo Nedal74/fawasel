@@ -303,6 +303,9 @@ export const adminStrings = {
     newStepName: "New step",
     newChoice: "New choice",
 
+    cityField: "City",
+    countryField: "Country code",
+    countryHelp: "Two letters, e.g. SA. Used by search engines to place you.",
     gaGroup: "Google Analytics",
     gaField: "GA4 measurement ID",
     gaHelp: "e.g. G-XXXXXXXXXX. Leave empty to turn Google Analytics off. GA uses cookies — the built-in analytics do not.",
@@ -600,6 +603,9 @@ export const adminStrings = {
     newStepName: "خطوة جديدة",
     newChoice: "اختيار جديد",
 
+    cityField: "المدينة",
+    countryField: "رمز الدولة",
+    countryHelp: "حرفان، مثل SA. تستخدمه محركات البحث لتحديد موقعك.",
     gaGroup: "Google Analytics",
     gaField: "معرّف GA4",
     gaHelp: "مثال: G-XXXXXXXXXX. اتركه فارغًا لإيقاف Google Analytics. خدمة GA تستخدم الكوكيز — الإحصائيات الداخلية لا تستخدمها.",

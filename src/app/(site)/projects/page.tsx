@@ -6,11 +6,10 @@ import { Container } from "@/components/ui/Container";
 import { getStrings } from "@/i18n/strings";
 import { getContentMap, getProjects } from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [content, locale] = await Promise.all([getContentMap(), getLocale()]);
-  const copy = makeCopy(content, locale);
-  return { title: copy("work.heading"), description: copy("work.intro") };
+  return pageMetadata("/projects");
 }
 
 export default async function ProjectsPage() {

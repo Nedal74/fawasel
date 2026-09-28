@@ -1,10 +1,19 @@
 import type { MetadataRoute } from "next";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "";
+import { getSiteUrl } from "@/lib/seo";
 
-export default function robots(): MetadataRoute.Robots {
+// Built per request so the sitemap URL is absolute even without
+// NEXT_PUBLIC_SITE_URL.
+export const dynamic = "force-dynamic";
+
+/**
+ * Everything public is crawlable (home, about, projects, articles, …). The
+ * dashboard and API routes are not: /admin also sends noindex itself.
+ */
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const base = await getSiteUrl();
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api"] }],
-    sitemap: BASE ? `${BASE}/sitemap.xml` : undefined,
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/"] }],
+    sitemap: `${base}/sitemap.xml`,
   };
 }

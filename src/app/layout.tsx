@@ -4,6 +4,7 @@ import { IBM_Plex_Sans_Arabic, JetBrains_Mono } from "next/font/google";
 import { getSettings } from "@/lib/cms/queries";
 import { dirFor, getLocale, pick } from "@/lib/i18n";
 import { currentPath, getSiteUrl, languageUrl } from "@/lib/seo";
+import { brandName } from "@/lib/seo-pages";
 
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     getSiteUrl(),
     currentPath(),
   ]);
+  const brand = await brandName(locale);
   const title = pick(settings.siteTitle, locale);
   const description = pick(settings.siteDescription, locale);
 
@@ -46,12 +48,28 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(base),
     alternates,
-    title: { default: title, template: `%s — NEDAL ELABID` },
+    // Page titles read "About — Nedal Elabid" (brand from the CMS, per language).
+    title: { default: title, template: `%s — ${brand}` },
     description,
     keywords: settings.keywords.split(",").map((k) => k.trim()).filter(Boolean),
     icons: { icon: settings.favicon || "/favicon.ico" },
+    // Public pages are indexable; the dashboard sets its own noindex.
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    // Defaults for pages without their own (e.g. 404); every public page
+    // overrides these through pageMetadata() in src/lib/seo-pages.ts.
     openGraph: {
-      type: "profile",
+      type: "website",
+      siteName: brand,
       title,
       description,
       locale: locale === "ar" ? "ar_SA" : "en_US",

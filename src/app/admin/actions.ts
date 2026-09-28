@@ -266,6 +266,15 @@ export async function saveSettingsAction(
     aboutImage: String(formData.get("aboutImage") ?? "").trim(),
     aboutMedia: formData.get("aboutMedia") === "image" ? "image" : "pills",
     gaMeasurementId: parseGaId(formData.get("gaMeasurementId")),
+    addressLocality: {
+      en: String(formData.get("addressLocality.en") ?? "").trim(),
+      ar: String(formData.get("addressLocality.ar") ?? "").trim(),
+    },
+    addressCountry: String(formData.get("addressCountry") ?? "")
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .slice(0, 2),
     sections,
   };
 

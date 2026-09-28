@@ -5,11 +5,10 @@ import { Container } from "@/components/ui/Container";
 import { getContentMap } from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
 import { parseArticleBody } from "@/lib/utils";
+import { pageMetadata } from "@/lib/seo-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [content, locale] = await Promise.all([getContentMap(), getLocale()]);
-  const copy = makeCopy(content, locale);
-  return { title: copy("privacy.heading"), description: copy("privacy.intro") };
+  return pageMetadata("/privacy");
 }
 
 /** Renders **bold** runs inside a CMS paragraph; everything else is text. */

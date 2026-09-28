@@ -4,11 +4,10 @@ import { PageHeader } from "@/components/public/PageHeader";
 import { ClientsSection, TestimonialsSection } from "@/components/public/Sections";
 import { getClients, getContentMap, getTestimonials } from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [content, locale] = await Promise.all([getContentMap(), getLocale()]);
-  const copy = makeCopy(content, locale);
-  return { title: copy("clients.heading"), description: copy("clients.intro") };
+  return pageMetadata("/clients");
 }
 
 export default async function ClientsPage() {

@@ -486,6 +486,9 @@ export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
         heroRevealImage: "",
         aboutImage: "/images/portrait-about.svg",
         aboutMedia: "pills",
+        // Matches the "Riyadh, KSA" already stated in hero.eyebrow.
+        addressLocality: L("Riyadh", "الرياض"),
+        addressCountry: "SA",
         gaMeasurementId: "",
         sections: {
           about: true,

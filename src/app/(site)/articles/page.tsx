@@ -5,11 +5,10 @@ import { ArticlesSection } from "@/components/public/Sections";
 import { getStrings } from "@/i18n/strings";
 import { getArticles, getContentMap } from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [content, locale] = await Promise.all([getContentMap(), getLocale()]);
-  const copy = makeCopy(content, locale);
-  return { title: copy("articles.heading"), description: copy("articles.intro") };
+  return pageMetadata("/articles");
 }
 
 export default async function ArticlesPage() {

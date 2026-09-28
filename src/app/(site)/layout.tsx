@@ -4,6 +4,7 @@ import { Footer } from "@/components/public/Footer";
 import { GoogleAnalytics } from "@/components/public/GoogleAnalytics";
 import { Navbar } from "@/components/public/Navbar";
 import { SiteTracker } from "@/components/public/SiteTracker";
+import { StructuredData } from "@/components/public/StructuredData";
 import { getStrings } from "@/i18n/strings";
 import {
   getChatbot,
@@ -13,9 +14,10 @@ import {
   getSocialLinks,
 } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
+import { currentPath } from "@/lib/seo";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const locale = await getLocale();
+  const [locale, { path }] = await Promise.all([getLocale(), currentPath()]);
   const [settings, navigation, socials, content, chatbot] = await Promise.all([
     getSettings(),
     getNavigation(),
@@ -50,6 +52,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         }))}
       />
 
+      {/* The site's single JSON-LD graph (src/lib/structured-data.ts). It is
+          rendered with each full page load, which is what crawlers use. */}
+      <StructuredData path={path} locale={locale} />
       <main id="main">{children}</main>
 
       <FloatingWhatsApp

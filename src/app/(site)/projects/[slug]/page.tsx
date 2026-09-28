@@ -4,8 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectCard } from "@/components/public/ProjectCard";
+import { ProjectGallery } from "@/components/public/ProjectGallery";
 import { Container } from "@/components/ui/Container";
-import { Crosshair, DataTicks, TechLabel } from "@/components/ui/Decor";
+import { DataTicks, TechLabel } from "@/components/ui/Decor";
 import { Reveal } from "@/components/ui/Reveal";
 import { getStrings } from "@/i18n/strings";
 import {
@@ -17,29 +18,14 @@ import {
   getSettings,
 } from "@/lib/cms/queries";
 import { getLocale, makeCopy, pick } from "@/lib/i18n";
-import { jsonLd as toJsonLd } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo-pages";
 import { whatsappLink } from "@/lib/utils";
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const [project, locale] = await Promise.all([getProjectBySlug(slug), getLocale()]);
-  if (!project) return { title: "Not found" };
-
-  const title = pick(project.seoTitle, locale) || pick(project.name, locale);
-  const description = pick(project.seoDescription, locale) || pick(project.summary, locale);
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      images: project.coverImage ? [{ url: project.coverImage }] : undefined,
-    },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  return pageMetadata(`/projects/${slug}`);
 }
 
 function Chapter({
@@ -89,23 +75,8 @@ export default async function ProjectPage({ params }: Params) {
     .filter((row) => !project.category.en || row.category.en === project.category.en)
     .slice(0, 2);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    name,
-    description: pick(project.summary, locale),
-    dateCreated: project.year || undefined,
-    creator: { "@type": "Person", name: copy("hero.name"), jobTitle: copy("hero.title") },
-    ...(client ? { about: pick(client.name, locale) } : {}),
-  };
-
   return (
     <article>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: toJsonLd(jsonLd) }}
-      />
-
       {/* Cover */}
       <header className="grain relative min-h-[70vh] overflow-hidden border-b border-[var(--color-line)] bg-void pt-32">
         {project.coverImage ? (
@@ -208,28 +179,20 @@ export default async function ProjectPage({ params }: Params) {
         {project.gallery.length > 0 ? (
           <section className="mt-16">
             <TechLabel>{strings.gallery}</TechLabel>
-            <div className="mt-5 grid gap-6 md:grid-cols-2">
-              {project.gallery.map((src, i) => (
-                <Reveal
-                  key={src + i}
-                  delay={(i % 2) * 70}
-                  className={i % 3 === 0 ? "md:col-span-2" : ""}
-                >
-                  <figure className="relative overflow-hidden border border-[var(--color-line)]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={src}
-                      alt={`${name} — ${i + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full object-cover"
-                    />
-                    <Crosshair className="-left-1.5 -top-1.5" />
-                    <Crosshair className="-bottom-1.5 -right-1.5" />
-                  </figure>
-                </Reveal>
-              ))}
-            </div>
+            <Reveal className="mt-5">
+              <ProjectGallery
+                images={project.gallery}
+                name={name}
+                locale={locale}
+                labels={{
+                  previous: strings.galleryPrevious,
+                  next: strings.galleryNext,
+                  close: strings.galleryClose,
+                  enlarge: strings.galleryEnlarge,
+                  image: strings.galleryImage,
+                }}
+              />
+            </Reveal>
           </section>
         ) : null}
 
