@@ -105,10 +105,11 @@ npm run local      # or: npm run dev
 
 With no `DATABASE_URL` configured, `npm run dev` does the same as
 `npm run local` (use `npm run dev:next` to run plain `next dev`).
-`npm run local` starts a private PostgreSQL that is installed through npm
-(`embedded-postgres`, Windows/macOS/Linux), keeps its data in `storage/pgdata`,
-applies migrations, seeds structural config, creates a local admin on the first
-run and starts the site at http://localhost:3000. Ctrl+C stops everything.
+`npm run local` runs PGlite (PostgreSQL compiled to WebAssembly, executed inside
+Node — no native binaries, so it behaves the same on Windows, macOS and Linux,
+including folder paths with spaces), keeps its data in `storage/pglite`, applies
+migrations, seeds structural config, creates a local admin on the first run and
+starts the site at http://localhost:3000. Ctrl+C stops everything.
 
 Local admin: `admin@aljafil.local` / `Aljafil12345` — change it in /admin/users.
 For local preview only; production uses a normal PostgreSQL server.

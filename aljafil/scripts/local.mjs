@@ -1,29 +1,36 @@
 /**
- * One-command local run with NO external database service:
+ * One-command local preview with NO database to install:
  *
- *   npm run local
+ *   npm run local        (or `npm run dev` when no DATABASE_URL is configured)
  *
- * Starts a private PostgreSQL bundled through npm (embedded-postgres, binaries
- * for Windows/macOS/Linux), stores its data in ./storage/pgdata, applies the
- * migrations, seeds structural config, creates a local admin on first run and
- * starts the Next.js dev server. Ctrl+C stops both.
+ * Runs PGlite — PostgreSQL compiled to WebAssembly, executed inside Node — and
+ * exposes it on 127.0.0.1:5433 through the Postgres wire protocol so Prisma can
+ * connect normally. No native binaries, so it behaves the same on Windows,
+ * macOS and Linux, whatever the folder path. Data persists in ./storage/pglite.
  *
- * For local preview only — production should use a managed/maintained PostgreSQL.
+ * Then: apply migrations, seed structural config, create a local admin on the
+ * first run, and start the Next.js dev server. Ctrl+C stops everything.
+ * For local preview only — production uses a real PostgreSQL server.
  */
-import { spawn } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import EmbeddedPostgres from "embedded-postgres";
+import { PGlite } from "@electric-sql/pglite";
+import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
+
+import { spawnCmd } from "./spawn-util.mjs";
 
 const PORT = Number(process.env.LOCAL_PG_PORT || 5433);
-const DATA_DIR = path.resolve("storage/pgdata");
-const DATABASE_URL = `postgresql://postgres:password@localhost:${PORT}/aljafil`;
+const DATA_DIR = path.resolve("storage", "pglite");
+// PGlite is a single shared backend: one pooled connection keeps transactions
+// isolated, and pgbouncer=true makes Prisma use unnamed prepared statements so
+// separate processes (migrate, seed, dev server) do not collide on "s0", "s1"…
+const DATABASE_URL = `postgresql://postgres:postgres@127.0.0.1:${PORT}/postgres?sslmode=disable&connection_limit=1&pgbouncer=true`;
 const ADMIN_EMAIL = "admin@aljafil.local";
 const ADMIN_PASSWORD = "Aljafil12345";
 
 function run(cmd, args, env = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: "inherit", shell: process.platform === "win32", env: { ...process.env, DATABASE_URL, ...env } });
+    const child = spawnCmd(cmd, args, { stdio: "inherit", env: { ...process.env, DATABASE_URL, ...env } });
     child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} exited with ${code}`))));
   });
 }
@@ -36,49 +43,38 @@ function ensureEnvFile() {
   }
 }
 
-const pg = new EmbeddedPostgres({
-  databaseDir: DATA_DIR,
-  port: PORT,
-  user: "postgres",
-  password: "password",
-  persistent: true,
-  // UTF-8 is required for Arabic content (Windows would otherwise default to a legacy code page).
-  initdbFlags: ["--encoding=UTF8", "--locale=C"],
-  // Postgres refuses to run as root (only relevant inside containers).
-  createPostgresUser: typeof process.getuid === "function" && process.getuid() === 0,
-  onLog: () => {},
-});
+let server;
+let db;
+async function stopDb() {
+  await server?.stop().catch(() => {});
+  await db?.close().catch(() => {});
+}
 
 async function main() {
   ensureEnvFile();
-  console.log("▶ Starting local PostgreSQL on port", PORT, "…");
-  if (!existsSync(path.join(DATA_DIR, "PG_VERSION"))) await pg.initialise();
-  await pg.start();
-  await pg.createDatabase("aljafil").catch(() => {}); // already exists
+  mkdirSync(DATA_DIR, { recursive: true });
+  console.log(`▶ Starting local database (PGlite) on 127.0.0.1:${PORT} …`);
+  db = await PGlite.create({ dataDir: DATA_DIR });
+  server = new PGLiteSocketServer({ db, port: PORT, host: "127.0.0.1", maxConnections: 20 });
+  await server.start();
 
   console.log("▶ Applying database migrations …");
   await run("npx", ["prisma", "migrate", "deploy"]);
   await run("npx", ["tsx", "prisma/seed.ts"]);
 
-  const { PrismaClient } = await import("@prisma/client");
-  const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
-  const users = await prisma.user.count();
-  await prisma.$disconnect();
-  if (users === 0) {
+  const users = await db.query('SELECT count(*)::int AS n FROM "User"');
+  if (users.rows[0].n === 0) {
     await run("npx", ["tsx", "scripts/create-admin.ts", "--email", ADMIN_EMAIL, "--name", "Admin"], { ADMIN_PASSWORD });
     console.log(`\n  Local admin → ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}  (change it from /admin/users)\n`);
   }
 
-  console.log("▶ Starting the website → http://localhost:3000  (dashboard: /admin)\n");
-  const next = spawn("npx", ["next", "dev", "-p", process.env.PORT || "3000"], {
-    stdio: "inherit",
-    shell: process.platform === "win32",
-    env: { ...process.env, DATABASE_URL },
-  });
+  const port = process.env.PORT || "3000";
+  console.log(`▶ Starting the website → http://localhost:${port}  (dashboard: /admin)\n`);
+  const next = spawnCmd("npx", ["next", "dev", "-p", port], { stdio: "inherit", env: { ...process.env, DATABASE_URL } });
 
   const shutdown = async () => {
     next.kill();
-    await pg.stop().catch(() => {});
+    await stopDb();
     process.exit(0);
   };
   process.on("SIGINT", shutdown);
@@ -87,7 +83,8 @@ async function main() {
 }
 
 main().catch(async (err) => {
-  console.error("\n✖", err.message);
-  await pg.stop().catch(() => {});
+  console.error("\n✖", err?.message ?? err);
+  if (err?.code === "EADDRINUSE") console.error(`  Port ${PORT} is busy. Close the other program or set LOCAL_PG_PORT to another port.`);
+  await stopDb();
   process.exit(1);
 });
