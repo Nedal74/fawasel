@@ -42,6 +42,8 @@ const pg = new EmbeddedPostgres({
   user: "postgres",
   password: "password",
   persistent: true,
+  // UTF-8 is required for Arabic content (Windows would otherwise default to a legacy code page).
+  initdbFlags: ["--encoding=UTF8", "--locale=C"],
   // Postgres refuses to run as root (only relevant inside containers).
   createPostgresUser: typeof process.getuid === "function" && process.getuid() === 0,
   onLog: () => {},
@@ -63,7 +65,7 @@ async function main() {
   const users = await prisma.user.count();
   await prisma.$disconnect();
   if (users === 0) {
-    await run("npx", ["tsx", "scripts/create-admin.ts", "--email", ADMIN_EMAIL, "--name", "مدير النظام"], { ADMIN_PASSWORD });
+    await run("npx", ["tsx", "scripts/create-admin.ts", "--email", ADMIN_EMAIL, "--name", "Admin"], { ADMIN_PASSWORD });
     console.log(`\n  Local admin → ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}  (change it from /admin/users)\n`);
   }
 

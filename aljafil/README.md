@@ -100,9 +100,11 @@ fall outside them). This keeps project-level and unit-level data consistent.
 ```bash
 cd aljafil
 npm install
-npm run local
+npm run local      # or: npm run dev
 ```
 
+With no `DATABASE_URL` configured, `npm run dev` does the same as
+`npm run local` (use `npm run dev:next` to run plain `next dev`).
 `npm run local` starts a private PostgreSQL that is installed through npm
 (`embedded-postgres`, Windows/macOS/Linux), keeps its data in `storage/pgdata`,
 applies migrations, seeds structural config, creates a local admin on the first
