@@ -95,6 +95,24 @@ fall outside them). This keeps project-level and unit-level data consistent.
 
 ## Local development
 
+### Quickest: one command, no database to install
+
+```bash
+cd aljafil
+npm install
+npm run local
+```
+
+`npm run local` starts a private PostgreSQL that is installed through npm
+(`embedded-postgres`, Windows/macOS/Linux), keeps its data in `storage/pgdata`,
+applies migrations, seeds structural config, creates a local admin on the first
+run and starts the site at http://localhost:3000. Ctrl+C stops everything.
+
+Local admin: `admin@aljafil.local` / `Aljafil12345` — change it in /admin/users.
+For local preview only; production uses a normal PostgreSQL server.
+
+### Using your own PostgreSQL
+
 Requirements: Node.js 20+ (tested on 22), PostgreSQL 14+ (tested on 16).
 
 ```bash
