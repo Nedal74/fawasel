@@ -375,6 +375,13 @@ check(
   "services page links to its landing pages",
   (await page.locator(`a[href="${LANDING}"]`).count()) > 0,
 );
+// The page header already carries this title; the section must not repeat it.
+const servicesTitle = (await page.locator("h1").innerText()).trim();
+check(
+  "services page states its title once",
+  (await page.locator("h2", { hasText: servicesTitle }).count()) === 0,
+  servicesTitle,
+);
 
 const landingResponse = await page.goto(`${BASE}${LANDING}`, { waitUntil: "networkidle" });
 check("GET the landing page — status 200", landingResponse?.status() === 200);
