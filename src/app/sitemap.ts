@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getArticles, getProjects } from "@/lib/cms/queries";
+import { getArticles, getLandingPages, getProjects } from "@/lib/cms/queries";
 import { getSiteUrl } from "@/lib/seo";
 
 // Projects and articles come from the CMS, so the sitemap is built per request.
@@ -14,7 +14,12 @@ type Entry = MetadataRoute.Sitemap[number];
  * /api are excluded here and disallowed in robots.ts.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [projects, articles, base] = await Promise.all([getProjects(), getArticles(), getSiteUrl()]);
+  const [projects, articles, landings, base] = await Promise.all([
+    getProjects(),
+    getArticles(),
+    getLandingPages(),
+    getSiteUrl(),
+  ]);
 
   const latest = (dates: string[]) => {
     const newest = dates.filter(Boolean).sort().at(-1);
@@ -42,6 +47,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/projects", { priority: 0.8, changeFrequency: "weekly", lastModified: projectsUpdated }),
     entry("/articles", { priority: 0.8, changeFrequency: "weekly", lastModified: articlesUpdated }),
     entry("/services", { priority: 0.7, changeFrequency: "monthly" }),
+    // Service landing pages are the ones ads point at: ranked above the rest.
+    ...landings.map((page) =>
+      entry(`/services/${page.slug}`, {
+        priority: 0.8,
+        changeFrequency: "monthly",
+        lastModified: new Date(page.updatedAt),
+      }),
+    ),
     entry("/clients", { priority: 0.6, changeFrequency: "monthly" }),
     entry("/contact", { priority: 0.6, changeFrequency: "yearly" }),
     ...projects.map((project) =>

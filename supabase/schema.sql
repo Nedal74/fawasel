@@ -51,6 +51,7 @@ call create_cms_table('projects');
 call create_cms_table('articles');
 call create_cms_table('clients');
 call create_cms_table('services');
+call create_cms_table('landing_pages');
 call create_cms_table('skills');
 call create_cms_table('tools');
 call create_cms_table('experience');
@@ -79,6 +80,8 @@ create index if not exists articles_date_idx
   on public.articles ((data->>'date') desc);
 create index if not exists projects_featured_idx
   on public.projects (((data->>'featured')::boolean));
+create unique index if not exists landing_pages_slug_key
+  on public.landing_pages ((data->>'slug'));
 create unique index if not exists site_content_key_key
   on public.site_content ((data->>'key'));
 create index if not exists media_assets_created_idx

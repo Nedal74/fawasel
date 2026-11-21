@@ -370,6 +370,100 @@ export const LEGACY_COPY: Record<string, Localized> = {
 /** The single category every service shipped with before the two-box split. */
 export const LEGACY_SERVICE_CATEGORY: Localized = L("Marketing", "التسويق");
 
+/**
+ * The first service landing page, written from the reviewed Arabic draft
+ * (21 Nov 2026). Every number here is already published in a case study on
+ * the site; nothing is invented. `projectIds` stays empty until the matching
+ * projects are picked in the dashboard, so the numbers can never disagree.
+ */
+const realEstateLanding: Omit<CollectionMap["landing_pages"], "id" | "createdAt" | "updatedAt"> = {
+  title: L("Real Estate Marketing in Riyadh", "التسويق العقاري في الرياض"),
+  slug: "real-estate-marketing-riyadh",
+  heroHeadline: L("Real Estate Marketing in Riyadh", "التسويق العقاري في الرياض"),
+  heroSubline: L(
+    "I take your real estate project from prospective buyers all the way to enquiries you can act on: photography, drone, paid campaigns and a landing page that captures the lead.",
+    "أحوّل مشروعك العقاري إلى اتفاق مع العملاء المحتملين: من التصوير والدرون، إلى الحملة الممولة، إلى صفحة تستقبل الاستفسارات.",
+  ),
+  heroImage: "",
+  heroImageAlt: L(
+    "A residential tower in Riyadh at sunset — a real estate marketing project.",
+    "برج سكني في الرياض وقت الغروب — مشروع تسويق عقاري.",
+  ),
+  heroStats: [
+    { label: L("Al Jafal Real Estate", "الجافل العقارية"), value: "800+" },
+    { label: L("Umam Real Estate", "أمم العقارية"), value: "2,000+" },
+    { label: L("Al Mugheeb Real Estate Development", "المغيب للتطوير العقاري"), value: "80" },
+  ],
+  ctaLabel: L("Talk to me on WhatsApp", "تحدّث معي على واتساب"),
+  whatsappMessage: L(
+    "Hi Nedal — I have a real estate project in Riyadh and I would like to talk about marketing it.",
+    "أهلًا نضال، عندي مشروع عقاري في الرياض وحابب أتكلم معك عن تسويقه.",
+  ),
+  offerHeading: L("What I deliver for your project", "ماذا أقدّم لمشروعك"),
+  offerItems: L(
+    `Paid campaign management :: Campaigns on the platforms your buyers actually use, targeted by project and by Riyadh, and built around enquiries rather than impressions.
+Social media management :: A steady presence that shows the project and answers the questions buyers ask before anyone calls you.
+Real estate photography and drone :: Ground and aerial coverage of the project and its location, so buyers see it the way they would on a site visit.
+Video production :: Short films for launches and ads that gather the location and the units into one simple, convincing story.
+Project website development :: A page for each project showing the location, the units and the features, taking enquiries directly.`,
+    `إدارة الحملات الإعلانية الممولة :: حملات على المنصات التي يتواجد فيها مشتروك ومستهدفة بالمشروع وبالرياض، باستهداف دقيق ورسائل تقود إلى الاستفسار لا إلى المشاهدات فقط.
+إدارة منصات التواصل الاجتماعي :: حضور مستمر يعرض مشروعك ويجيب عن أسئلة المهتمين، ويبني الثقة قبل أن يتصل بك أحد.
+التصوير العقاري والدرون :: تصوير معماري أرضي ولقطات جوية تظهر المشروع وموقعه ومحيطه كما سيشاهده العميل عند الزيارة.
+إنتاج الفيديو :: فيديوهات قصيرة للمشاريع والإعلانات تجمع الموقع والوحدات والميزات في سرد بسيط ومقنع.
+تطوير مواقع المشاريع :: صفحة أو موقع لكل مشروع يعرض الموقع والوحدات والمزايا ويستقبل طلبات الاستفسار مباشرة.`,
+  ),
+  offerNote: L(
+    "The scope is agreed against a commercial outcome, not against a list of deliverables.",
+    "يُحدَّد نطاق العمل بناءً على نتيجة تجارية، لا على قائمة مخرجات.",
+  ),
+  methodHeading: L("How I work", "طريقة العمل"),
+  methodSteps: L(
+    `Understanding the brief :: A session to understand your project, its location, its audience, its selling prices, and the commercial goal — sales or rentals or bookings.
+Building the project's assets :: The visual and written material (photography, drone, video, ad copy).
+Launching the campaigns :: Paid campaigns that take enquiries and route them to a channel you own: WhatsApp, a landing page or a request form.
+Measuring and improving :: Tracking the cost of a qualified lead and the quality of enquiries, and adjusting targeting and messaging weekly.
+Clear reporting :: Periodic numbers that answer three questions — how many leads, where from, and at what cost.`,
+    `الفهم قبل الإعلان :: جلسة لفهم مشروعك وموقعه وجمهوره وأسعار المنافسين والهدف التجاري: بيع أو تأجير أو حجوزات.
+بناء أصول المشروع :: صفحة المشروع والمحتوى البصري (تصوير أرضي ودرون وفيديو) ورسائل الإعلانات.
+إطلاق الحملات :: حملات ممولة تستقبل الاستفسارات وتوصلها إلى قناة تملكها: واتساب أو صفحة أو نموذج طلب.
+القياس والتحسين :: متابعة تكلفة العميل المحتمل وجودة الاستفسارات، وتعديل الاستهداف والرسائل أسبوعيًا.
+تقارير واضحة :: أرقام دورية تجيب عن ثلاثة أسئلة: كم عميلًا محتملًا، ومن أين، وبكم كلّف.`,
+  ),
+  caseStudiesHeading: L("Case studies", "دراسات الحالة"),
+  projectIds: [],
+  faqHeading: L("Frequently asked questions", "الأسئلة الشائعة"),
+  faqItems: L(
+    `How much does real estate marketing in Riyadh cost? :: The cost depends on the scope: campaign management only, or a full scope covering photography, content and the project website. It is set after the first session, not quoted blind.
+When do results start to show? :: On comparable projects, enquiries started within the first week of a campaign going live. On one real estate project that reached more than 800 prospective leads in 25 days — timing depends on the project's readiness and the media budget.
+Do you work with developers and brokerages? :: Yes. I work with real estate development companies on marketing their projects, and with brokerage offices and firms on generating prospective buyers and tenants.
+What is the difference between you and an agency? :: You deal with me directly — one person who understands your project, builds it, runs your campaigns, and reads the numbers with you, instead of a brief moving between departments.
+Does the photography service cover inside Riyadh? :: Yes — photography, drone and video are part of the project assets I produce, with the licences and permits required in Saudi Arabia.
+Do I need a website for every project? :: Not necessarily a full site. Sometimes a single clear page per project is enough to present it and take enquiries, and it can be developed later as the work grows.`,
+    `كم تبلغ تكلفة التسويق العقاري في الرياض؟ :: تعتمد التكلفة على نطاق العمل: إدارة حملات فقط، أم نطاق كامل يشمل التصوير والمحتوى وموقع المشروع. وهي تُحدَّد بعد جلسة الفهم الأولى بالطبق والسعر، دون أي افتراض.
+متى تبدأ النتائج في الظهور؟ :: في المشاريع المشابهة بدأت الاستفسارات خلال الأسبوع الأول من إطلاق الحملة. في أحد المشاريع العقارية وصلنا إلى أكثر من 800 عميل محتمل خلال 25 يومًا، ويبقى التوقيت على جاهزية المشروع والميزانية الإعلانية.
+هل تعمل مع المطورين وشركات الوساطة؟ :: نعم، أعمل مع شركات التطوير العقاري على تسويق مشاريعها، ومع مكاتب وشركات الوساطة على توليد عملاء محتملين للبيع والتأجير.
+ما الفرق بينك وبين وكالة تسويق؟ :: تتعامل معي مباشرة: شخص واحد يفهم مشروعك ويبنيه ويدير حملاتك ويقرأ الأرقام معك، بدل أن ينتقل البريف بين الأقسام.
+هل تشمل خدمة التصوير بالدرون داخل الرياض؟ :: نعم، التصوير الأرضي والدرون جزء من أصول المشروع التي أنتجها، مع التراخيص والتصاريح المعمول بها في السعودية.
+هل أحتاج موقعًا إلكترونيًا لكل مشروع؟ :: ليس بالضرورة موقعًا كاملًا. أحيانًا تكفي صفحة واحدة واضحة لكل مشروع تعرضه وتستقبل الاستفسارات، ويمكن تطويرها لاحقًا مع اتساع نطاق العمل.`,
+  ),
+  closingHeading: L("Ready to talk about your project?", "جاهز نتكلم عن مشروعك؟"),
+  closingBody: L(
+    "Message me on WhatsApp and I will get back to you myself. One message is enough to start.",
+    "راسلني على واتساب وسأرد عليك بنفسي. الرسالة الأولى تكفي، صفحة واحدة.",
+  ),
+  seoTitle: L(
+    "Real Estate Marketing in Riyadh | Nedal Elabid",
+    "التسويق العقاري في الرياض | نضال الأبيض",
+  ),
+  seoDescription: L(
+    "Real estate marketing in Riyadh with documented results: 800+ prospective leads in 25 days for Al Jafal, 2,000+ for Umam, and 80 units booked in 5 months. Paid campaigns, photography, drone and project websites.",
+    "تسويق عقاري في الرياض بأرقام موثقة: أكثر من 800 عميل محتمل في 25 يومًا للجافل، و2,000+ لأمم، و80 مكتبًا محجوزًا للمغيب في 5 أشهر. حملات ممولة، تصوير ودرون، ومواقع مشاريع.",
+  ),
+  featured: true,
+  published: true,
+  order: 0,
+};
+
 export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
   return {
     projects: [],
@@ -390,6 +484,7 @@ export function seedData(): { [K in CollectionName]: CollectionMap[K][] } {
         order: i,
       }),
     ),
+    landing_pages: [stamp<"landing_pages">("lp-real-estate-riyadh", structuredClone(realEstateLanding))],
     services: serviceSeed.map(([id, en, ar, den, dar], i) =>
       stamp<"services">(`svc-${id}`, {
         title: L(en, ar),

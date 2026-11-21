@@ -8,6 +8,7 @@ import {
   getSocialLinks,
 } from "@/lib/cms/queries";
 import type { Locale } from "@/lib/cms/types";
+import { landingBlocks } from "@/lib/landing";
 import { pick } from "@/lib/locale";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { canonicalUrl, readableCase, resolvePageSeo, type PageSeo } from "@/lib/seo-pages";
@@ -163,6 +164,58 @@ export async function buildStructuredData(path: string, locale: Locale): Promise
     );
   }
 
+  // A service page: the Service being sold, plus its questions as an FAQPage.
+  if (seo.landing) {
+    const page = seo.landing;
+    const name = pick(page.heroHeadline, locale) || pick(page.title, locale);
+    const offer = landingBlocks(page.offerItems, locale);
+    graph.push(
+      compact({
+        "@type": "Service",
+        "@id": `${url}#service`,
+        name,
+        description: seo.description,
+        image: image || undefined,
+        url,
+        inLanguage: locale,
+        provider: { "@id": ids.person },
+        areaServed: pick(settings.addressLocality, locale) || undefined,
+        serviceType: pick(page.title, locale) || undefined,
+        hasOfferCatalog: offer.length
+          ? {
+              "@type": "OfferCatalog",
+              name,
+              itemListElement: offer.map((item) => ({
+                "@type": "Offer",
+                itemOffered: compact({
+                  "@type": "Service",
+                  name: item.title,
+                  description: item.body || undefined,
+                }),
+              })),
+            }
+          : undefined,
+        mainEntityOfPage: { "@id": pageId },
+        isPartOf: { "@id": ids.website },
+      }),
+    );
+
+    const faq = landingBlocks(page.faqItems, locale).filter((item) => item.body);
+    if (faq.length > 0) {
+      graph.push({
+        "@type": "FAQPage",
+        "@id": `${url}#faq`,
+        inLanguage: locale,
+        isPartOf: { "@id": ids.website },
+        mainEntity: faq.map((item) => ({
+          "@type": "Question",
+          name: item.title,
+          acceptedAnswer: { "@type": "Answer", text: item.body },
+        })),
+      });
+    }
+  }
+
   if (seo.project) {
     const project = seo.project;
     const clients = await getClients();
@@ -201,6 +254,8 @@ function pageType(seo: PageSeo): string {
     case "clients":
     case "services":
       return "CollectionPage";
+    case "landing":
+      return "WebPage";
     default:
       return "WebPage";
   }

@@ -7,10 +7,11 @@ import {
   getArticleBySlug,
   getContentMap,
   getNavigation,
+  getLandingPageBySlug,
   getProjectBySlug,
   getSettings,
 } from "@/lib/cms/queries";
-import type { Article, Locale, Project } from "@/lib/cms/types";
+import type { Article, LandingPage, Locale, Project } from "@/lib/cms/types";
 import { getLocale, pick } from "@/lib/i18n";
 import { absoluteUrl, currentPath, getSiteUrl, languageUrl } from "@/lib/seo";
 
@@ -24,6 +25,7 @@ export type PageKind =
   | "home"
   | "about"
   | "services"
+  | "landing"
   | "projects"
   | "project"
   | "articles"
@@ -42,6 +44,7 @@ export type PageSeo = {
   breadcrumb: { name: string; path: string }[];
   article?: Article;
   project?: Project;
+  landing?: LandingPage;
 };
 
 /** "NEDAL ELABID" → "Nedal Elabid"; mixed-case or Arabic text is untouched. */
@@ -101,6 +104,26 @@ export const resolvePageSeo = cache(async (path: string, locale: Locale): Promis
       description: description || pick(settings.siteDescription, locale),
       image: section.kind === "about" ? settings.aboutImage || settings.ogImage : settings.ogImage,
       breadcrumb: [home, sectionCrumb(path, title)],
+    };
+  }
+
+  const landing = path.match(/^\/services\/([^/]+)$/);
+  if (landing) {
+    const row = await getLandingPageBySlug(decodeURIComponent(landing[1]));
+    if (!row) return null;
+    const title = pick(row.seoTitle, locale) || pick(row.heroHeadline, locale);
+    return {
+      kind: "landing",
+      path,
+      title,
+      description: pick(row.seoDescription, locale) || pick(row.heroSubline, locale),
+      image: row.heroImage || settings.ogImage,
+      breadcrumb: [
+        home,
+        sectionCrumb("/services", copy("services.heading")),
+        { name: pick(row.title, locale), path },
+      ],
+      landing: row,
     };
   }
 
