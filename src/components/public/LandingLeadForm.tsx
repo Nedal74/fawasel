@@ -39,6 +39,9 @@ export function LandingLeadForm({
     const nextErrors: Record<string, string> = {};
     if (!data.name?.trim()) nextErrors.name = strings.formRequired;
     if (!data.phone?.trim()) nextErrors.phone = strings.formRequired;
+    if (data.email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      nextErrors.email = strings.formInvalidEmail;
+    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -68,7 +71,7 @@ export function LandingLeadForm({
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+    <form onSubmit={onSubmit} noValidate className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
       <div>
         <label className="sr-only" htmlFor="lead-name">
           {strings.formName}
@@ -100,6 +103,23 @@ export function LandingLeadForm({
           className="h-12 w-full border border-[var(--color-line)] bg-void px-4 text-sm text-offwhite outline-none transition-colors placeholder:text-dim focus:border-accent"
         />
         {errors.phone ? <p className="mt-1.5 text-xs text-accent">{errors.phone}</p> : null}
+      </div>
+
+      <div>
+        <label className="sr-only" htmlFor="lead-email">
+          {strings.formEmail}
+        </label>
+        <input
+          id="lead-email"
+          name="email"
+          type="email"
+          dir="ltr"
+          autoComplete="email"
+          placeholder={`${strings.formEmail} (${strings.formOptional})`}
+          aria-invalid={Boolean(errors.email)}
+          className="h-12 w-full border border-[var(--color-line)] bg-void px-4 text-sm text-offwhite outline-none transition-colors placeholder:text-dim focus:border-accent"
+        />
+        {errors.email ? <p className="mt-1.5 text-xs text-accent">{errors.email}</p> : null}
       </div>
 
       <div>

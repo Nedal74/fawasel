@@ -198,7 +198,13 @@ await page.fill("#summary-en", "A project created by the automated smoke test.")
 await page.fill("#category-en", "Performance");
 await page.fill("#year", "2026");
 await page.check('input[name="featured"]');
-await page.fill("#gallery", "/images/portrait-hero.svg\n/images/og-image.svg\n/images/portrait-about.svg");
+// The gallery field is a picker now: paste the URLs into its entry box and add them.
+// The gallery field is a picker now: its entry box takes a comma-separated list.
+await page.fill(
+  "#gallery",
+  "/images/portrait-hero.svg,/images/og-image.svg,/images/portrait-about.svg",
+);
+await page.getByRole("button", { name: "Add", exact: true }).click();
 await Promise.all([
   page.waitForURL(/\/admin\/projects\/(?!new)[^/]+/, { timeout: 15000 }),
   page.getByRole("button", { name: "Save", exact: true }).click(),
