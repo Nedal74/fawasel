@@ -152,23 +152,28 @@ export function ServicesSection({
   locale,
   copy,
   strings,
+  /** False on /services, where the page header already carries this title. */
+  withHeading = true,
 }: {
   services: Service[];
   locale: Locale;
   copy: Copy;
   strings: UiStrings;
+  withHeading?: boolean;
 }) {
   if (services.length === 0) return null;
 
   return (
-    <Container as="section" id="services" className={SECTION}>
-      <SectionHeading
-        index="03"
-        eyebrow={copy("services.eyebrow")}
-        title={copy("services.heading")}
-        intro={copy("services.intro")}
-      />
-      <Reveal from="blur" delay={120} className="mt-12">
+    <Container as="section" id="services" className={withHeading ? SECTION : "pb-24 lg:pb-32"}>
+      {withHeading ? (
+        <SectionHeading
+          index="03"
+          eyebrow={copy("services.eyebrow")}
+          title={copy("services.heading")}
+          intro={copy("services.intro")}
+        />
+      ) : null}
+      <Reveal from="blur" delay={120} className={withHeading ? "mt-12" : ""}>
         <ServicesSlider
           brand={copy("hero.name")}
           services={services.map((service) => ({
