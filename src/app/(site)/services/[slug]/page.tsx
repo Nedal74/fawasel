@@ -13,7 +13,6 @@ import { getStrings } from "@/i18n/strings";
 import {
   getClients,
   getLandingPageBySlug,
-  getLandingPages,
   getProjects,
   getServices,
   getSettings,
@@ -27,11 +26,6 @@ type Params = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   return pageMetadata(`/services/${slug}`);
-}
-
-export async function generateStaticParams() {
-  const pages = await getLandingPages().catch(() => []);
-  return pages.map((page) => ({ slug: page.slug }));
 }
 
 export default async function ServiceLandingPage({ params }: Params) {
