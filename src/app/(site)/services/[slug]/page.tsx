@@ -5,19 +5,22 @@ import {
   LandingCaseStudies,
   LandingClosing,
   LandingFaq,
+  LandingGallery,
   LandingHero,
+  LandingLead,
   LandingMethod,
   LandingOffer,
 } from "@/components/public/LandingSections";
 import { getStrings } from "@/i18n/strings";
 import {
   getClients,
+  getContentMap,
   getLandingPageBySlug,
   getProjects,
   getServices,
   getSettings,
 } from "@/lib/cms/queries";
-import { getLocale } from "@/lib/i18n";
+import { getLocale, makeCopy } from "@/lib/i18n";
 import { landingBlocks } from "@/lib/landing";
 import { pageMetadata } from "@/lib/seo-pages";
 
@@ -34,13 +37,15 @@ export default async function ServiceLandingPage({ params }: Params) {
   const page = await getLandingPageBySlug(decodeURIComponent(slug));
   if (!page) notFound();
 
-  const [settings, projects, clients, services] = await Promise.all([
+  const [settings, projects, clients, services, content] = await Promise.all([
     getSettings(),
     getProjects(),
     getClients(),
     getServices(),
+    getContentMap(),
   ]);
   const strings = getStrings(locale);
+  const copy = makeCopy(content, locale);
 
   // Case studies keep the dashboard's order, so the page reads top-down.
   const picked = page.projectIds
@@ -52,6 +57,7 @@ export default async function ServiceLandingPage({ params }: Params) {
   let section = 0;
   const nextIndex = () => String(++section).padStart(2, "0");
   const offerIndex = landingBlocks(page.offerItems, locale).length > 0 ? nextIndex() : "";
+  const galleryIndex = page.gallery?.length ? nextIndex() : "";
   const methodIndex = landingBlocks(page.methodSteps, locale).length > 0 ? nextIndex() : "";
   const caseIndex = picked.length > 0 ? nextIndex() : "";
   const faqIndex = landingBlocks(page.faqItems, locale).length > 0 ? nextIndex() : "";
@@ -59,7 +65,8 @@ export default async function ServiceLandingPage({ params }: Params) {
   return (
     <main>
       <LandingHero page={page} locale={locale} phone={settings.whatsapp} />
-      <LandingOffer page={page} locale={locale} index={offerIndex} />
+      <LandingOffer page={page} locale={locale} index={offerIndex} brand={copy("hero.name")} />
+      <LandingGallery page={page} locale={locale} index={galleryIndex} strings={strings} />
       <LandingMethod page={page} locale={locale} index={methodIndex} />
       <LandingCaseStudies
         page={page}
@@ -71,6 +78,12 @@ export default async function ServiceLandingPage({ params }: Params) {
         index={caseIndex}
       />
       <LandingFaq page={page} locale={locale} index={faqIndex} />
+      <LandingLead
+        page={page}
+        locale={locale}
+        strings={strings}
+        successMessage={copy("contact.success") || strings.formSubmit}
+      />
       <LandingClosing page={page} locale={locale} phone={settings.whatsapp} />
     </main>
   );

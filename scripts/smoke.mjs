@@ -383,6 +383,11 @@ check(
   "landing page offers a pre-filled WhatsApp link",
   (await page.locator('a[href*="wa.me/"][href*="text="]').count()) > 0,
 );
+check(
+  "landing page offer uses the slider cards",
+  (await page.locator('[aria-roledescription="carousel"]').count()) >= 2,
+);
+check("landing page lead form takes a name and a phone", (await page.locator("#lead-name").count()) === 1 && (await page.locator("#lead-phone").count()) === 1);
 for (const width of [1280, 390]) {
   await page.setViewportSize({ width, height: 900 });
   const bleed = await page.evaluate(

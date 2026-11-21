@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import type { Locale } from "@/lib/cms/types";
+import { useAutoAdvance, usePageVisible } from "@/hooks/useAutoAdvance";
 import { cn } from "@/lib/utils";
 
 /**
@@ -32,14 +33,18 @@ export function ProjectGallery({
   name,
   locale,
   labels,
+  /** Milliseconds between slides; omitted means the gallery waits to be driven. */
+  autoAdvanceMs,
 }: {
   images: string[];
   name: string;
   locale: Locale;
   labels: Labels;
+  autoAdvanceMs?: number;
 }) {
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
+  const [held, setHeld] = useState(false);
   const count = images.length;
   const rtl = locale === "ar";
 
@@ -54,6 +59,15 @@ export function ProjectGallery({
   const go = useCallback((next: number) => setIndex(((next % count) + count) % count), [count]);
   const next = useCallback(() => setIndex((current) => (current + 1) % count), [count]);
   const previous = useCallback(() => setIndex((current) => (current - 1 + count) % count), [count]);
+
+  // Plays itself where a caller asks for it, pausing while the visitor is
+  // pointing at it, while the lightbox is open, or while the tab is hidden.
+  const pageVisible = usePageVisible();
+  useAutoAdvance(next, {
+    interval: autoAdvanceMs ?? 0,
+    paused: !autoAdvanceMs || held || open || !pageVisible || count < 2,
+    resetKey: index,
+  });
 
   // Keep the active thumbnail centred in the strip. Skipped while the
   // lightbox is open so the page behind it never jumps.
@@ -120,7 +134,12 @@ export function ProjectGallery({
   if (count === 0) return null;
 
   return (
-    <div>
+    <div
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={() => setHeld(false)}
+    >
       <div className="relative">
         <div
           className="relative aspect-[4/5] overflow-hidden border border-[var(--color-line)] bg-[#0a0a0a] min-[760px]:aspect-[16/10]"
