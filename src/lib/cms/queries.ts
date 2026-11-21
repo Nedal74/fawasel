@@ -142,12 +142,26 @@ export const getServices = cache(async (): Promise<Service[]> => {
   });
 });
 
+/**
+ * A database that has not run supabase/update-2026-11-service-pages.sql yet
+ * has no `landing_pages` table. That must not take the services page or the
+ * sitemap down with it, so a missing table reads as "no service pages".
+ */
+const listLandingPages = cache(async (): Promise<LandingPage[]> => {
+  try {
+    return await listAll("landing_pages");
+  } catch (error) {
+    console.warn("[cms] landing_pages unavailable, treating as empty:", error);
+    return [];
+  }
+});
+
 export const getLandingPages = cache(async (): Promise<LandingPage[]> =>
-  byOrder(publishedOnly(await listAll("landing_pages"))),
+  byOrder(publishedOnly(await listLandingPages())),
 );
 
 export const getLandingPageBySlug = cache(async (slug: string): Promise<LandingPage | null> => {
-  const rows = await listAll("landing_pages");
+  const rows = await listLandingPages();
   return rows.find((page) => page.slug === slug && page.published) ?? null;
 });
 
