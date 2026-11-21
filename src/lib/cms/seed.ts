@@ -9,6 +9,7 @@ const SEEDED: CollectionName[] = [
   "site_settings",
   "site_content",
   "services",
+  "landing_pages",
   "skills",
   "clients",
   "metrics",

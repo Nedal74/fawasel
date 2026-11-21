@@ -2,9 +2,16 @@ import type { Metadata } from "next";
 
 import { ContactSection } from "@/components/public/ContactSection";
 import { PageHeader } from "@/components/public/PageHeader";
+import { ServiceLandingsSection } from "@/components/public/LandingSections";
 import { ServicesSection } from "@/components/public/Sections";
 import { getStrings } from "@/i18n/strings";
-import { getContentMap, getServices, getSettings, getSocialLinks } from "@/lib/cms/queries";
+import {
+  getContentMap,
+  getLandingPages,
+  getServices,
+  getSettings,
+  getSocialLinks,
+} from "@/lib/cms/queries";
 import { getLocale, makeCopy } from "@/lib/i18n";
 import { pageMetadata } from "@/lib/seo-pages";
 
@@ -14,11 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ServicesPage() {
   const locale = await getLocale();
-  const [content, services, settings, socials] = await Promise.all([
+  const [content, services, settings, socials, landings] = await Promise.all([
     getContentMap(),
     getServices(),
     getSettings(),
     getSocialLinks(),
+    getLandingPages(),
   ]);
   const copy = makeCopy(content, locale);
   const strings = getStrings(locale);
@@ -31,6 +39,14 @@ export default async function ServicesPage() {
         intro={copy("services.intro")}
       />
       <ServicesSection services={services} locale={locale} copy={copy} strings={strings} />
+      <ServiceLandingsSection
+        pages={landings}
+        locale={locale}
+        eyebrow={strings.servicePagesEyebrow}
+        heading={strings.servicePagesHeading}
+        intro={strings.servicePagesIntro}
+        ctaLabel={strings.openServicePage}
+      />
       <ContactSection
         settings={settings}
         services={services}

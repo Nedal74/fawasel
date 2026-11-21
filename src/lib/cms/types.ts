@@ -5,6 +5,12 @@
  * than inside a component, so the dashboard can edit the site without a deploy.
  */
 
+/** A labelled figure, e.g. "Qualified leads" → "800+". */
+export interface KeyMetric {
+  label: Localized;
+  value: string;
+}
+
 /** A piece of copy that exists in both site languages. */
 export type Localized = {
   en: string;
@@ -33,7 +39,7 @@ export interface Project extends BaseDoc {
   execution: Localized;
   results: Localized;
   serviceIds: string[];
-  keyMetrics: { label: Localized; value: string }[];
+  keyMetrics: KeyMetric[];
   coverImage: string;
   gallery: string[];
   videoUrl: string;
@@ -69,6 +75,43 @@ export interface Service extends BaseDoc {
   /** Per-service CTA shown on the slider card. */
   ctaLabel: Localized;
   ctaUrl: string;
+  featured: boolean;
+  published: boolean;
+  order: number;
+}
+
+export interface LandingPage extends BaseDoc {
+  /** Internal name shown in the dashboard list. */
+  title: Localized;
+  /** Lives at /services/<slug>. */
+  slug: string;
+  /** The page's single H1. */
+  heroHeadline: Localized;
+  heroSubline: Localized;
+  heroImage: string;
+  heroImageAlt: Localized;
+  /** The proof row under the hero (label + value), e.g. "Al Jafal / 800+". */
+  heroStats: KeyMetric[];
+  ctaLabel: Localized;
+  /** Pre-filled WhatsApp text, different for every service. */
+  whatsappMessage: Localized;
+  offerHeading: Localized;
+  /** One item per line: "Title :: description". */
+  offerItems: Localized;
+  offerNote: Localized;
+  methodHeading: Localized;
+  /** One step per line: "Title :: description". */
+  methodSteps: Localized;
+  caseStudiesHeading: Localized;
+  /** Real projects from the CMS — never numbers typed in twice. */
+  projectIds: string[];
+  faqHeading: Localized;
+  /** One pair per line: "Question :: answer". */
+  faqItems: Localized;
+  closingHeading: Localized;
+  closingBody: Localized;
+  seoTitle: Localized;
+  seoDescription: Localized;
   featured: boolean;
   published: boolean;
   order: number;
@@ -272,6 +315,7 @@ export type CollectionMap = {
   articles: Article;
   clients: Client;
   services: Service;
+  landing_pages: LandingPage;
   skills: Skill;
   tools: Tool;
   experience: ExperienceEntry;
@@ -295,6 +339,7 @@ export const COLLECTION_NAMES = [
   "articles",
   "clients",
   "services",
+  "landing_pages",
   "skills",
   "tools",
   "experience",

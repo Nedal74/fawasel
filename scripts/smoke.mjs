@@ -367,6 +367,56 @@ check(
 );
 check("no duplicate @id in the graph", new Set(aboutIds).size === aboutIds.length, aboutIds.join(", "));
 check("breadcrumb on inner pages", aboutNodes.some((node) => node["@type"] === "BreadcrumbList"));
+
+// --- service landing pages --------------------------------------------------
+const LANDING = "/services/real-estate-marketing-riyadh";
+await page.goto(`${BASE}/services`, { waitUntil: "networkidle" });
+check(
+  "services page links to its landing pages",
+  (await page.locator(`a[href="${LANDING}"]`).count()) > 0,
+);
+
+const landingResponse = await page.goto(`${BASE}${LANDING}`, { waitUntil: "networkidle" });
+check("GET the landing page — status 200", landingResponse?.status() === 200);
+check("landing page has exactly one h1", (await page.locator("h1").count()) === 1);
+check(
+  "landing page offers a pre-filled WhatsApp link",
+  (await page.locator('a[href*="wa.me/"][href*="text="]').count()) > 0,
+);
+for (const width of [1280, 390]) {
+  await page.setViewportSize({ width, height: 900 });
+  const bleed = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  check(`no horizontal overflow ${LANDING} @${width}px`, bleed <= 1, `${bleed}px`);
+}
+await page.setViewportSize({ width: 1280, height: 900 });
+
+const landingNodes = JSON.parse(
+  await page.locator('script[type="application/ld+json"]').first().innerText(),
+)["@graph"];
+check(
+  "landing page declares a Service provided by #person",
+  landingNodes.some(
+    (node) => node["@type"] === "Service" && String(node.provider?.["@id"]).endsWith("/#person"),
+  ),
+);
+check(
+  "landing page declares an FAQPage with questions",
+  landingNodes.some((node) => node["@type"] === "FAQPage" && node.mainEntity?.length > 0),
+);
+const landingIds = landingNodes.map((node) => node["@id"]).filter(Boolean);
+check("no duplicate @id on the landing page", new Set(landingIds).size === landingIds.length);
+
+const sitemap = await (await fetch(`${BASE}/sitemap.xml`)).text();
+check("landing page is in the sitemap", sitemap.includes(LANDING));
+
+await page.goto(`${BASE}${LANDING}?lang=en`, { waitUntil: "networkidle" });
+check(
+  "landing page renders in English too",
+  (await page.evaluate(() => document.documentElement.getAttribute("dir"))) === "ltr" &&
+    (await page.locator("h1").innerText()).trim().length > 0,
+);
 await page.goto(`${BASE}/?lang=ar`, { waitUntil: "networkidle" });
 check(
   "?lang=ar renders Arabic",

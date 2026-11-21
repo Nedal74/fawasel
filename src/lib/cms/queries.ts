@@ -12,6 +12,7 @@ import type {
   CollectionMap,
   CollectionName,
   ExperienceEntry,
+  LandingPage,
   Metric,
   NavigationItem,
   Project,
@@ -139,6 +140,15 @@ export const getServices = cache(async (): Promise<Service[]> => {
     const seed = seeded.get(service.id);
     return untouched && seed ? { ...service, category: seed.category } : service;
   });
+});
+
+export const getLandingPages = cache(async (): Promise<LandingPage[]> =>
+  byOrder(publishedOnly(await listAll("landing_pages"))),
+);
+
+export const getLandingPageBySlug = cache(async (slug: string): Promise<LandingPage | null> => {
+  const rows = await listAll("landing_pages");
+  return rows.find((page) => page.slug === slug && page.published) ?? null;
 });
 
 export const getSkills = cache(async (): Promise<Skill[]> =>
