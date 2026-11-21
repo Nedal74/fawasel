@@ -102,12 +102,18 @@ export interface LandingPage extends BaseDoc {
   methodHeading: Localized;
   /** One step per line: "Title :: description". */
   methodSteps: Localized;
+  /** Designs produced for clients, shown as an auto-advancing gallery. */
+  galleryHeading: Localized;
+  gallery: string[];
   caseStudiesHeading: Localized;
   /** Real projects from the CMS — never numbers typed in twice. */
   projectIds: string[];
   faqHeading: Localized;
   /** One pair per line: "Question :: answer". */
   faqItems: Localized;
+  leadHeading: Localized;
+  leadBody: Localized;
+  leadButton: Localized;
   closingHeading: Localized;
   closingBody: Localized;
   seoTitle: Localized;

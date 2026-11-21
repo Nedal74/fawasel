@@ -389,10 +389,30 @@ const realEstateLanding: Omit<CollectionMap["landing_pages"], "id" | "createdAt"
     "A residential tower in Riyadh at sunset — a real estate marketing project.",
     "برج سكني في الرياض وقت الغروب — مشروع تسويق عقاري.",
   ),
+  // The figure leads and the sentence under it says what it counts, so a
+  // number is never shown without the work it came from.
   heroStats: [
-    { label: L("Al Jafal Real Estate", "الجافل العقارية"), value: "800+" },
-    { label: L("Umam Real Estate", "أمم العقارية"), value: "2,000+" },
-    { label: L("Al Mugheeb Real Estate Development", "المغيب للتطوير العقاري"), value: "80" },
+    {
+      label: L(
+        "prospective leads in 25 days — Al Jafal Real Estate",
+        "عميل محتمل خلال 25 يومًا — الجافل العقارية",
+      ),
+      value: "800+",
+    },
+    {
+      label: L(
+        "prospective leads in about 4 months — Umam Real Estate",
+        "عميل محتمل خلال نحو 4 أشهر — أمم العقارية",
+      ),
+      value: "2,000+",
+    },
+    {
+      label: L(
+        "offices booked in 5 months — Al Mugheeb Real Estate Development",
+        "مكتبًا محجوزًا خلال 5 أشهر — المغيب للتطوير العقاري",
+      ),
+      value: "80",
+    },
   ],
   ctaLabel: L("Talk to me on WhatsApp", "تحدّث معي على واتساب"),
   whatsappMessage: L(
@@ -429,6 +449,8 @@ Clear reporting :: Periodic numbers that answer three questions — how many lea
 القياس والتحسين :: متابعة تكلفة العميل المحتمل وجودة الاستفسارات، وتعديل الاستهداف والرسائل أسبوعيًا.
 تقارير واضحة :: أرقام دورية تجيب عن ثلاثة أسئلة: كم عميلًا محتملًا، ومن أين، وبكم كلّف.`,
   ),
+  galleryHeading: L("Designs from the work", "تصاميم من الشغل"),
+  gallery: [],
   caseStudiesHeading: L("Case studies", "دراسات الحالة"),
   projectIds: [],
   faqHeading: L("Frequently asked questions", "الأسئلة الشائعة"),
@@ -446,6 +468,12 @@ Do I need a website for every project? :: Not necessarily a full site. Sometimes
 هل تشمل خدمة التصوير بالدرون داخل الرياض؟ :: نعم، التصوير الأرضي والدرون جزء من أصول المشروع التي أنتجها، مع التراخيص والتصاريح المعمول بها في السعودية.
 هل أحتاج موقعًا إلكترونيًا لكل مشروع؟ :: ليس بالضرورة موقعًا كاملًا. أحيانًا تكفي صفحة واحدة واضحة لكل مشروع تعرضه وتستقبل الاستفسارات، ويمكن تطويرها لاحقًا مع اتساع نطاق العمل.`,
   ),
+  leadHeading: L("Prefer I call you?", "تفضّل أتصل بك؟"),
+  leadBody: L(
+    "Leave a name and a number and I will get back to you myself. Nothing else is needed.",
+    "سيب اسمك ورقمك وأرجع لك بنفسي. مش محتاج أي حاجة تانية.",
+  ),
+  leadButton: L("Send", "أرسل"),
   closingHeading: L("Ready to talk about your project?", "جاهز نتكلم عن مشروعك؟"),
   closingBody: L(
     "Message me on WhatsApp and I will get back to you myself. One message is enough to start.",

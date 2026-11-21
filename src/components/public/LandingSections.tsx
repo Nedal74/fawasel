@@ -1,7 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
+import { LandingLeadForm } from "@/components/public/LandingLeadForm";
+import { MethodSteps } from "@/components/public/MethodSteps";
 import { ProjectCard } from "@/components/public/ProjectCard";
+import { ProjectGallery } from "@/components/public/ProjectGallery";
+import { ServicesSlider } from "@/components/public/ServicesSlider";
 import { Container } from "@/components/ui/Container";
 import { DataTicks, TechLabel } from "@/components/ui/Decor";
 import { Reveal } from "@/components/ui/Reveal";
@@ -102,9 +106,12 @@ export function LandingHero({
         <Reveal delay={160} className="mt-10">
           <dl className="grid gap-px border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-3">
             {stats.map((stat) => (
-              <div key={stat.label} className="bg-[var(--color-void)] px-5 py-6">
-                <dt className="label text-[0.625rem] text-dim">{stat.label}</dt>
-                <dd className="display mt-2 text-3xl text-accent">{stat.value}</dd>
+              <div key={stat.label} className="bg-[var(--color-void)] px-5 py-7">
+                {/* The figure leads; the sentence under it says what it counts. */}
+                <dd className="display text-[clamp(2.25rem,5vw,3.5rem)] leading-none text-accent">
+                  {stat.value}
+                </dd>
+                <dt className="mt-3 text-xs leading-relaxed text-muted">{stat.label}</dt>
               </div>
             ))}
           </dl>
@@ -124,60 +131,101 @@ export function LandingHero({
   );
 }
 
-/** Numbered list used for both the offer and the method. */
-function BlockList({
-  heading,
+export function LandingOffer({
+  page,
+  locale,
   index,
-  blocks,
-  note,
+  brand,
 }: {
-  heading: string;
+  page: LandingPage;
+  locale: Locale;
   index: string;
-  blocks: { title: string; body: string }[];
-  note?: string;
+  brand: string;
 }) {
+  const blocks = landingBlocks(page.offerItems, locale);
   if (blocks.length === 0) return null;
+  const note = pick(page.offerNote, locale);
+
   return (
     <Container as="section" className={SECTION}>
-      <SectionHeading index={index} title={heading} />
-      <ol className="mt-10 border-t border-[var(--color-line)]">
-        {blocks.map((block, i) => (
-          <Reveal as="li" key={block.title} delay={i * 60} className="border-b border-[var(--color-line)]">
-            <div className="grid gap-2 py-6 sm:grid-cols-[3rem_1fr] sm:gap-6">
-              <span className="label text-[0.625rem] text-accent">{String(i + 1).padStart(2, "0")}</span>
-              <div>
-                <h3 className="text-base font-medium">{block.title}</h3>
-                {block.body ? (
-                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted">{block.body}</p>
-                ) : null}
-              </div>
-            </div>
-          </Reveal>
-        ))}
-      </ol>
-      {note ? <p className="mt-6 max-w-2xl text-xs leading-relaxed text-dim">{note}</p> : null}
+      <SectionHeading index={index} title={pick(page.offerHeading, locale)} />
+      <Reveal from="blur" delay={120} className="mt-12">
+        {/* The same carousel the services section uses, so a service reads the
+            same wherever the visitor meets it. */}
+        <ServicesSlider
+          brand={brand}
+          services={blocks.map((block, i) => ({
+            id: `${page.slug}-offer-${i}`,
+            title: block.title,
+            description: block.body,
+            category: pick(page.title, locale),
+            ctaLabel: "",
+            ctaUrl: "",
+          }))}
+        />
+      </Reveal>
+      {note ? <p className="mt-8 max-w-2xl text-xs leading-relaxed text-dim">{note}</p> : null}
     </Container>
   );
 }
 
-export function LandingOffer({ page, locale, index }: { page: LandingPage; locale: Locale; index: string }) {
+/** Designs produced for clients, as a gallery that plays itself. */
+export function LandingGallery({
+  page,
+  locale,
+  index,
+  strings,
+}: {
+  page: LandingPage;
+  locale: Locale;
+  index: string;
+  strings: UiStrings;
+}) {
+  if (!page.gallery || page.gallery.length === 0) return null;
+  const heading = pick(page.galleryHeading, locale) || strings.gallery;
+
   return (
-    <BlockList
-      index={index}
-      heading={pick(page.offerHeading, locale)}
-      blocks={landingBlocks(page.offerItems, locale)}
-      note={pick(page.offerNote, locale)}
-    />
+    <Container as="section" className={SECTION}>
+      <SectionHeading index={index} title={heading} />
+      <Reveal from="blur" delay={100} className="mt-10">
+        <ProjectGallery
+          images={page.gallery}
+          name={heading}
+          locale={locale}
+          autoAdvanceMs={3500}
+          labels={{
+            previous: strings.galleryPrevious,
+            next: strings.galleryNext,
+            close: strings.galleryClose,
+            enlarge: strings.galleryEnlarge,
+            image: strings.galleryImage,
+          }}
+        />
+      </Reveal>
+    </Container>
   );
 }
 
-export function LandingMethod({ page, locale, index }: { page: LandingPage; locale: Locale; index: string }) {
+export function LandingMethod({
+  page,
+  locale,
+  index,
+}: {
+  page: LandingPage;
+  locale: Locale;
+  index: string;
+}) {
+  const steps = landingBlocks(page.methodSteps, locale);
+  if (steps.length === 0) return null;
+  const heading = pick(page.methodHeading, locale);
+
   return (
-    <BlockList
-      index={index}
-      heading={pick(page.methodHeading, locale)}
-      blocks={landingBlocks(page.methodSteps, locale)}
-    />
+    <Container as="section" className={SECTION}>
+      <SectionHeading index={index} title={heading} />
+      <Reveal delay={100} className="mt-12">
+        <MethodSteps steps={steps} label={heading} />
+      </Reveal>
+    </Container>
   );
 }
 
@@ -245,6 +293,47 @@ export function LandingFaq({ page, locale, index }: { page: LandingPage; locale:
           </Reveal>
         ))}
       </div>
+    </Container>
+  );
+}
+
+/** Two fields and a button: the lowest-friction way off this page. */
+export function LandingLead({
+  page,
+  locale,
+  strings,
+  successMessage,
+}: {
+  page: LandingPage;
+  locale: Locale;
+  strings: UiStrings;
+  successMessage: string;
+}) {
+  const heading = pick(page.leadHeading, locale);
+  const body = pick(page.leadBody, locale);
+  if (!heading && !body) return null;
+
+  return (
+    <Container as="section" className={SECTION}>
+      <Reveal>
+        <div className="border border-[var(--color-line)] bg-[var(--color-graphite)] p-7 lg:p-10">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              {heading ? <h2 className="display text-[clamp(1.5rem,3vw,2.25rem)]">{heading}</h2> : null}
+              {body ? <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">{body}</p> : null}
+            </div>
+          </div>
+          <div className="mt-8">
+            <LandingLeadForm
+              strings={strings}
+              service={pick(page.title, locale)}
+              slug={page.slug}
+              buttonLabel={pick(page.leadButton, locale)}
+              successMessage={successMessage}
+            />
+          </div>
+        </div>
+      </Reveal>
     </Container>
   );
 }
