@@ -3,6 +3,7 @@
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import { MediaMultiPicker } from "@/components/admin/MediaMultiPicker";
 import { MediaPicker, type MediaOption } from "@/components/admin/MediaPicker";
 import { fieldHelp, fieldLabel, type Field } from "@/lib/cms/collections";
 import type { AdminStrings } from "@/i18n/admin";
@@ -130,19 +131,13 @@ function FieldControl({
       return <MediaPicker name={field.name} defaultValue={String(value ?? "")} library={media} label={label} t={t} />;
     case "images":
       return (
-        <div>
-          <label className="admin-label" htmlFor={field.name}>
-            {label}
-          </label>
-          <textarea
-            id={field.name}
-            name={field.name}
-            rows={4}
-            defaultValue={Array.isArray(value) ? value.join("\n") : ""}
-            placeholder={t.oneUrlPerLine}
-            className="admin-input"
-          />
-        </div>
+        <MediaMultiPicker
+          name={field.name}
+          defaultValue={Array.isArray(value) ? (value as string[]) : []}
+          library={media}
+          label={label}
+          t={t}
+        />
       );
     case "tags":
       return (

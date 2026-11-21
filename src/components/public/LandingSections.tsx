@@ -67,46 +67,69 @@ export function LandingHero({
   const subline = pick(page.heroSubline, locale);
   const stats = landingStats(page.heroStats, locale);
   const alt = pick(page.heroImageAlt, locale) || headline;
+  const hasImage = Boolean(page.heroImage);
 
   return (
-    <Container as="header" className="grain relative pb-14 pt-36 lg:pb-20 lg:pt-44">
-      <div className="grid-field pointer-events-none absolute inset-0 -z-10 opacity-50" aria-hidden />
-      <div className="flex items-center gap-3">
-        <span className="animate-tick block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-        <TechLabel>{pick(page.title, locale)}</TechLabel>
-        <span className="accent-rule h-px w-16 opacity-70" aria-hidden />
-      </div>
+    <header className="grain relative overflow-hidden border-b border-[var(--color-line)] bg-void pt-32">
+      {/* The cover sits behind the words, dimmed and faded into the page, the
+          way a project page carries its own. */}
+      {hasImage ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={page.heroImage}
+            alt={alt}
+            className="absolute inset-0 h-full w-full object-cover opacity-45"
+            fetchPriority="high"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-void)_8%,rgba(8,9,11,0.35)_70%)]"
+          />
+        </>
+      ) : (
+        <div className="grid-field absolute inset-0 opacity-50" aria-hidden />
+      )}
 
-      <h1 className="display animate-mask-up mt-6 text-[clamp(2.25rem,6vw,4.75rem)]" style={{ animationDelay: "0.15s" }}>
-        {headline}
-      </h1>
+      <Container className="relative flex min-h-[58vh] flex-col justify-end pb-12">
+        <div className="flex items-center gap-3">
+          <span className="animate-tick block h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+          <TechLabel>{pick(page.title, locale)}</TechLabel>
+          <span className="accent-rule h-px w-16 opacity-70" aria-hidden />
+        </div>
 
-      {subline ? (
-        <p className="animate-rise mt-6 max-w-2xl text-sm leading-relaxed text-muted" style={{ animationDelay: "0.3s" }}>
-          {subline}
-        </p>
-      ) : null}
+        <h1
+          className="display animate-mask-up mt-6 max-w-5xl text-[clamp(2.25rem,6vw,4.75rem)]"
+          style={{ animationDelay: "0.15s" }}
+        >
+          {headline}
+        </h1>
 
-      {page.heroImage ? (
-        <Reveal from="blur" delay={120} className="mt-10">
-          <figure className="relative overflow-hidden border border-[var(--color-line)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={page.heroImage}
-              alt={alt}
-              width={1600}
-              height={900}
-              className="aspect-[16/9] w-full object-cover"
-            />
-          </figure>
-        </Reveal>
-      ) : null}
+        {subline ? (
+          <p
+            className="animate-rise mt-6 max-w-2xl text-sm leading-relaxed text-muted"
+            style={{ animationDelay: "0.3s" }}
+          >
+            {subline}
+          </p>
+        ) : null}
+
+        <div className="mt-9 flex flex-wrap items-center gap-4">
+          <WhatsAppCta
+            phone={phone}
+            message={pick(page.whatsappMessage, locale)}
+            label={pick(page.ctaLabel, locale)}
+            slug={page.slug}
+          />
+          <DataTicks className="hidden h-3 sm:block" />
+        </div>
+      </Container>
 
       {stats.length > 0 ? (
-        <Reveal delay={160} className="mt-10">
+        <Container className="relative pb-14">
           <dl className="grid gap-px border border-[var(--color-line)] bg-[var(--color-line)] sm:grid-cols-3">
             {stats.map((stat) => (
-              <div key={stat.label} className="bg-[var(--color-void)] px-5 py-7">
+              <div key={stat.label} className="bg-[var(--color-void)]/90 px-5 py-7 backdrop-blur-sm">
                 {/* The figure leads; the sentence under it says what it counts. */}
                 <dd className="display text-[clamp(2.25rem,5vw,3.5rem)] leading-none text-accent">
                   {stat.value}
@@ -115,19 +138,9 @@ export function LandingHero({
               </div>
             ))}
           </dl>
-        </Reveal>
+        </Container>
       ) : null}
-
-      <div className="mt-10 flex flex-wrap items-center gap-4 border-t border-[var(--color-line)] pt-8">
-        <WhatsAppCta
-          phone={phone}
-          message={pick(page.whatsappMessage, locale)}
-          label={pick(page.ctaLabel, locale)}
-          slug={page.slug}
-        />
-        <DataTicks className="hidden h-3 sm:block" />
-      </div>
-    </Container>
+    </header>
   );
 }
 
@@ -175,13 +188,17 @@ export function LandingGallery({
   locale,
   index,
   strings,
+  fallback = [],
 }: {
   page: LandingPage;
   locale: Locale;
   index: string;
   strings: UiStrings;
+  /** Case-study images, used until the page is given a gallery of its own. */
+  fallback?: string[];
 }) {
-  if (!page.gallery || page.gallery.length === 0) return null;
+  const images = page.gallery?.length ? page.gallery : fallback;
+  if (images.length === 0) return null;
   const heading = pick(page.galleryHeading, locale) || strings.gallery;
 
   return (
@@ -189,7 +206,7 @@ export function LandingGallery({
       <SectionHeading index={index} title={heading} />
       <Reveal from="blur" delay={100} className="mt-10">
         <ProjectGallery
-          images={page.gallery}
+          images={images}
           name={heading}
           locale={locale}
           autoAdvanceMs={3500}
@@ -309,9 +326,10 @@ export function LandingLead({
   strings: UiStrings;
   successMessage: string;
 }) {
-  const heading = pick(page.leadHeading, locale);
-  const body = pick(page.leadBody, locale);
-  if (!heading && !body) return null;
+  // The form is the page's only on-site conversion point, so it always shows;
+  // the CMS supplies the wording when it has some.
+  const heading = pick(page.leadHeading, locale) || strings.leadHeadingFallback;
+  const body = pick(page.leadBody, locale) || strings.leadBodyFallback;
 
   return (
     <Container as="section" className={SECTION}>

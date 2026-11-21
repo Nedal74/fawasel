@@ -57,7 +57,11 @@ export default async function ServiceLandingPage({ params }: Params) {
   let section = 0;
   const nextIndex = () => String(++section).padStart(2, "0");
   const offerIndex = landingBlocks(page.offerItems, locale).length > 0 ? nextIndex() : "";
-  const galleryIndex = page.gallery?.length ? nextIndex() : "";
+  // Until the page has a gallery of its own, it borrows the case studies'.
+  const galleryImages = page.gallery?.length
+    ? page.gallery
+    : picked.flatMap((project) => [project.coverImage, ...project.gallery]).filter(Boolean);
+  const galleryIndex = galleryImages.length > 0 ? nextIndex() : "";
   const methodIndex = landingBlocks(page.methodSteps, locale).length > 0 ? nextIndex() : "";
   const caseIndex = picked.length > 0 ? nextIndex() : "";
   const faqIndex = landingBlocks(page.faqItems, locale).length > 0 ? nextIndex() : "";
@@ -66,7 +70,13 @@ export default async function ServiceLandingPage({ params }: Params) {
     <main>
       <LandingHero page={page} locale={locale} phone={settings.whatsapp} />
       <LandingOffer page={page} locale={locale} index={offerIndex} brand={copy("hero.name")} />
-      <LandingGallery page={page} locale={locale} index={galleryIndex} strings={strings} />
+      <LandingGallery
+        page={page}
+        locale={locale}
+        index={galleryIndex}
+        strings={strings}
+        fallback={galleryImages}
+      />
       <LandingMethod page={page} locale={locale} index={methodIndex} />
       <LandingCaseStudies
         page={page}
